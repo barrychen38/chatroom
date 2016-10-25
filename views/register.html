@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<title>Register</title>
+	<link rel="icon" href="/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="/css/common.css">
+</head>
+<body>
+	
+	<form class="register">
+		<span class="input_title">Name:</span> <input class="name" type="text" name="name" maxlength="20" placeholder="Name"><br>
+		<span class="input_title">Sex:</span> <label for="man"><input class="sex" id="man" type="radio" name="sex" value="man" checked="checked"> man</label><label for="women"><input class="sex" id="women" type="radio" name="sex" value="women"> women</label><br>
+		<span class="input_title">Age:</span> <input class="age" type="text" name="age" maxlength="20" placeholder="Age"><br>
+		<span class="input_title">Mobile:</span> <input class="mobile" type="tel" name="mobile" maxlength="11" placeholder="Mobile"><br>
+		<span class="input_title">Email:</span> <input class="email" type="email" name="email" maxlength="50" placeholder="Email"><br>
+		<span class="input_title">Password:</span> <input class="pwd" type="password" name="password" maxlength="16" placeholder="Password"><br>
+		<span class="input_title">rPassword:</span> <input class="rPwd" type="password" name="rPassword" maxlength="16" placeholder="Password Again"><br>
+		<input class="submit" type="button" name="submit" value="Register"><span class="or">or</span><a href="/login" class="login_btn">Login</a>
+	</form>
+	<p class="errMsg"></p>
+	
+	<script type="text/javascript" src="/scripts/jquery.min.js"></script>
+	<script type="text/javascript" src="/scripts/register.js"></script>
+</body>
+</html>

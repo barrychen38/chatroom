@@ -378,3 +378,8 @@ table {
 p {
   margin: 0;
 }
+
+a {
+  color: #777;
+  text-decoration: none;
+}
