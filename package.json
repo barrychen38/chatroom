@@ -1,13 +1,13 @@
 {
-  "name": "api",
+  "name": "test",
   "version": "1.0.0",
-  "description": "api",
+  "description": "test",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "api"
+    "test"
   ],
   "author": "funnychen38",
   "license": "ISC",
