@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<title>Chat</title>
+	<link rel="icon" href="/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="/css/common.css">
+</head>
+<body>
+	
+	<div class="enter_nickname">
+		<form>
+			<p>Please enter your nickname</p>
+			<input class="nickname" type="text" name="nickname" maxlength="50">
+			<input class="confirm" type="button" name="confirm" value="confirm">
+		</form>
+	</div>
+	<div class="container">
+		<div class="messages bc">
+			<div class="inner clearfix">
+				<ul class="left fl">
+					<li>How are you?</li>
+				</ul>
+				<ul class="right fl">
+					<li>I am fine.</li>
+				</ul>
+			</div>
+		</div>
+		<div class="text bc">
+			<textarea class="input" autofocus="autofocus" name="input" placeholder="SEND MY MESSAGE"></textarea>
+			<input class="send" type="button" name="send" value="SEND">
+		</div>
+	</div>
+	
+	<script type="text/javascript" src="/scripts/jquery.min.js"></script>
+	<script type="text/javascript" src="/scripts/chat.js"></script>
+</body>
+</html>

@@ -1,7 +1,30 @@
 /* common */
 input {
-	padding: 8px 12px;
+	padding: 8px;
 	margin-top: 16px;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.clearfix:after {
+	content: '';
+	display: block;
+	clear: both;
+	width: 0;
+	height: 0;
+}
+
+.fl {
+	float: left;
+}
+
+.bc {
+	margin-left: auto;
+	margin-right: auto;
 }
 
 /* login */
@@ -35,4 +58,100 @@ input[type="radio"] {
 	margin-left: 20px;
 }
 
-/* welcome */
+/* chat */
+.enter_nickname {
+	width: 100%;
+	height: 100%;
+	background: #fff;
+	overflow: hidden;
+	z-index: 9;
+	display: none;
+}
+.enter_nickname form {
+	text-align: center;
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+.enter_nickname form p {
+	font-size: 24px;
+}
+.enter_nickname .nickname {
+	text-align: center;
+	border: 0;
+	border-bottom: 1px solid #000;
+	font-size: 20px;
+	color: #777;
+}
+.enter_nickname .confirm,
+.container .text .send {
+	border: 1px solid #ddd;
+	background: #ddd;
+	color: #000;
+	border-radius: 4px;
+}
+.container {
+	width: 100%;
+	height: 100%;
+	background: #2a333c;
+	overflow: hidden;
+}
+.container .messages {
+	width: 480px;
+	height: 400px;
+	padding: 12px;
+	background: #fff;
+	margin-top: 120px;
+}
+.container .messages .inner {
+	width: 100%;
+	height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+.container .messages .left,
+.container .messages .right {
+	width: 50%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+.container .messages .left li,
+.container .messages .right li {
+	width: 180px;
+	height: auto;
+	padding: 8px;
+	border-radius: 4px;
+	overflow: hidden;
+}
+.container .messages .left li {
+	background: #ddd;
+}
+.container .messages .right li {
+	background: #aedff7;
+}
+.container .text {
+	width: 504px;
+	height: auto;
+	position: relative;
+}
+.container .text .input {
+	resize: none;
+	border: 0;
+	width: 410px;
+	height: 80px;
+	padding: 12px 82px 12px 12px;
+	border-top: 1px solid #ddd;
+	overflow: auto;
+}
+.container .text .send {
+	margin: 0 0 0 16px;
+	padding: 4px 6px;
+	position: absolute;
+	right: 8px;
+	bottom: 8px;
+	z-index: 1;
+}

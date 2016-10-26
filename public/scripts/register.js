@@ -1,23 +1,26 @@
 $(function() {
 	
 	var $name = $('.name'),
-		$sex = $('.sex:checked'),
-		$age = $('.age'),
 		$mobile = $('.mobile'),
 		$email = $('.email'),
 		$password = $('.pwd'),
 		$rPassword = $('.rPwd'),
 		$submit = $('.submit');
 	
+	var uid = getQueryString('uid');
+	
+	if (uid === null) {
+		uid = '';
+	}
+	
 	$submit.on('click', function() {
 		if (checkPwd($password, $rPassword)) {
 			submit({
 				name: $name.val(),
-				sex: $sex.val(),
-				age: +$age.val(),
 				mobile: $mobile.val(),
 				email: $email.val(),
-				password: $password.val()
+				password: $password.val(),
+				uid: uid
 			}, function(data) {
 				var result = data.result;
 				if (result === 1) {
@@ -49,6 +52,13 @@ $(function() {
 				fn && fn(data);
 			}
 		});
+	}
+	
+	function getQueryString(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"),
+			r = window.location.search.substr(1).match(reg);
+		if (r != null) return decodeURIComponent(r[2]);
+		return null;
 	}
 	
 });
