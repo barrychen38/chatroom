@@ -22,9 +22,21 @@ html, body {
 	float: left;
 }
 
+.fr {
+	float: right;
+}
+
 .bc {
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.ghost {
+	display: none;
+}
+
+::-webkit-scrollbar {
+	display: none;
 }
 
 /* login */
@@ -65,7 +77,10 @@ input[type="radio"] {
 	background: #fff;
 	overflow: hidden;
 	z-index: 9;
-	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	/*display: none;*/
 }
 .enter_nickname form {
 	text-align: center;
@@ -98,54 +113,118 @@ input[type="radio"] {
 	background: #2a333c;
 	overflow: hidden;
 }
+.container .wrapper {
+	width: 544px;
+	height: auto;
+	background: #fff;
+	border-radius: 4px;
+}
+.container .whoiam {
+	width: 520px;
+	height: 32px;
+	line-height: 32px;
+	padding: 12px;
+	/*background: #fff;*/
+	font-size: 18px;
+	border-bottom: 1px solid #ddd;
+	margin-top: 80px;
+	cursor: default;
+}
 .container .messages {
-	width: 480px;
+	width: 520px;
 	height: 400px;
 	padding: 12px;
-	background: #fff;
-	margin-top: 120px;
+	cursor: default;
+	/*background: #fff;*/
 }
 .container .messages .inner {
 	width: 100%;
 	height: 100%;
 	overflow-x: hidden;
-	overflow-y: auto;
+	overflow-y: scroll;
 }
 .container .messages .left,
 .container .messages .right {
 	width: 50%;
-	height: 100%;
+	height: auto;
 	margin: 0;
 	padding: 0;
 	position: relative;
 }
-.container .messages .left li,
-.container .messages .right li {
-	width: 180px;
+.container .messages .left {
+	text-align: left;
+}
+.container .messages .right {
+	text-align: right;
+}
+.container .messages li {
+	display: inline-block;
+	max-width: 200px;
 	height: auto;
 	padding: 8px;
 	border-radius: 4px;
-	overflow: hidden;
+	/*overflow: hidden;*/
+	position: relative;
+	margin-top: 24px;
+	text-align: left;
+	font-size: 14px;
 }
 .container .messages .left li {
-	background: #ddd;
+	background: #D9F4FE;
+	margin-left: 8px;
 }
 .container .messages .right li {
-	background: #aedff7;
+	background: #F3F3F3;
+	margin-right: 8px;
+}
+.container .messages li:after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+	display: block;
+	width: 0;
+	height: 0;
+	border: 8px solid transparent;
+}
+.container .messages .left li:after {
+	border-right-color: #D9F4FE;
+	left: -16px;
+}
+.container .messages .right li:after {
+	border-left-color: #F3F3F3;
+	right: -16px;
+}
+.container .messages li i {
+	display: inline-block;
+	position: absolute;
+	top: -16px;
+	font-size: 11px;
+	color: #777;
+}
+.container .messages .left li i {
+	content: 'Jason';
+	left: 6px;
+}
+.container .messages .right li i {
+	/*content: 'Barry';*/
+	right: 6px;
 }
 .container .text {
-	width: 504px;
+	width: 544px;
 	height: auto;
 	position: relative;
 }
 .container .text .input {
 	resize: none;
 	border: 0;
-	width: 410px;
+	width: 450px;
 	height: 80px;
 	padding: 12px 82px 12px 12px;
 	border-top: 1px solid #ddd;
 	overflow: auto;
+	border-radius: 0 0 4px 4px;
 }
 .container .text .send {
 	margin: 0 0 0 16px;
@@ -154,4 +233,12 @@ input[type="radio"] {
 	right: 8px;
 	bottom: 8px;
 	z-index: 1;
+}
+.container .tip {
+	color: #fff;
+	font-size: 12px;
+	text-align: center;
+	padding: 12px 0;
+	letter-spacing: 0.5px;
+	cursor: default;
 }
