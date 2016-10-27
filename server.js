@@ -1,9 +1,9 @@
 var express = require('express'),
+	http = require('http'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs'),
 	mysql = require('mysql'),
-	favicon = require('serve-favicon'),
-	eventproxy = require('eventproxy');
+	favicon = require('serve-favicon');
 
 // file module
 var login = require('./routes/login'),
@@ -13,7 +13,9 @@ var login = require('./routes/login'),
 
 var port = process.env.PORT || 3000;
 
-var app = express();
+var app = express(),
+	server = http.createServer(app),
+	io = require('socket.io')(server);
 
 app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
@@ -31,16 +33,55 @@ app.use(bodyParser.urlencoded({extended: true}));
 // mysql pool
 var pool = mysql.createPool(mysql_config);
 
+var count_people = 0;
+
 // get info
-app.post('/getInfo', function(req, res) {
-	var request = req.body;
-	
+app.get('/getInfo', function(req, res) {
+	pool.getConnection(function(err, connection) {
+		if (err) {
+			console.error('MYSQL CONNECT ERROR.');
+			res.send(JSON.stringify({result: 0}));
+			return;
+		}
+		connection.query('SELECT * FROM user', function(err, rows) {
+			if (err) {
+				console.error('SELECT SQL ERROR.');
+				res.send(JSON.stringify({result: 0}));
+				return;
+			}
+			res.send(JSON.stringify({result: 1, data: rows}));
+			connection.release();
+		});
+	});
 });
 
 // login
 app.post('/loginConfirm', function(req, res) {
 	var request = req.body;
-	
+	pool.getConnection(function(err, connection) {
+		if (err) {
+			console.error('MYSQL CONNECT ERROR.');
+			res.send(JSON.stringify({result: 0}));
+			return;
+		}
+		connection.query('SELECT * FROM user WHERE email = ?', [request.name], function(err, rows) {
+			if (err) {
+				console.error('SELECT SQL ERROR.');
+				res.send(JSON.stringify({result: 0}));
+				return;
+			}
+			if (rows.length) {
+				if (rows[0].pwd === request.password) {
+					res.send(JSON.stringify({result: 1}));
+				} else {
+					res.send(JSON.stringify({result: 3}));
+				}
+			} else {
+				res.send(JSON.stringify({result: 2}));
+			}
+			connection.release();
+		});
+	});
 });
 
 // register
@@ -48,9 +89,19 @@ app.post('/register', function(req, res) {
 	var request = req.body,
 		values = [request.name, request.mobile, request.password, request.email, request.uid];
 	pool.getConnection(function(err, connection) {
+		if (err) {
+			console.error('MYSQL CONNECT ERROR.');
+			res.send(JSON.stringify({result: 0}));
+			return;
+		}
 		connection.query('SELECT mobile,email FROM user WHERE uid = ?', [request.uid], function(err, rows) {
 			if (rows.length) {
 				connection.query('UPDATE user SET name = ?, mobile = ?, pwd = ?, email = ? WHERE uid = ?', values, function(err, results) {
+					if (err) {
+						console.error('UPDATE SQL ERROR.');
+						res.send(JSON.stringify({result: 0}));
+						return;
+					}
 					res.send(JSON.stringify({result: 2}));
 					connection.release();
 				});
@@ -64,6 +115,13 @@ app.post('/register', function(req, res) {
 	});
 });
 
-app.listen(port, function() {
+// chat
+io.on('connection', function(socket) {
+	socket.on('chat', function(data) {
+		io.emit('chat', data);
+	});
+});
+
+server.listen(port, function() {
 	console.log('Server is running at 127.0.0.1:' + port);
 });

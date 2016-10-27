@@ -18,12 +18,22 @@ $(function() {
 			},
 			success: function(data) {
 				var result = data.result;
-				if (result === 1) {
-					$err_msg.html('');
-					alert('Login Success.');
-				}
-				if (result === 0) {
-					$err_msg.html('Username or Password Error!');
+				switch (result) {
+					case 1:
+						$err_msg.html('');
+						alert('Login Success.');
+						break;
+					case 2:
+						$err_msg.html('No username.');
+						break;
+					case 3:
+						$err_msg.html('Wrong password.');
+						break;
+					case 0:
+						alert('ERROR.');
+						break;
+					default:
+						break;
 				}
 			},
 			complete: function() {

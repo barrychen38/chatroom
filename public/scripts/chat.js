@@ -1,14 +1,21 @@
 $(function() {
 	
+	window.onbeforeunload = function() {
+		return confirm();
+	}
+	
 	var $confirm = $('.confirm'),
 		$nickname = $('.nickname'),
 		$input = $('.input'),
 		$inner = $('.messages .inner'),
-		$o_message = $('.messages .left'),
-		$message = $('.messages .right');
+		$l_message = $('.messages .left'),
+		$r_message = $('.messages .right');
 	
 	var your_nickname = '<i>Guest</i>',
-		your_message = '<li>Hello World!' + your_nickname + '</li><br>';
+		your_message = '<li>Hello World!' + your_nickname + '</li><br>',
+		other_message;
+	
+	var socket = io();
 	
 	$confirm.on('click', function(event) {
 		event.preventDefault();
@@ -25,8 +32,7 @@ $(function() {
 	$input.on('keydown', function(event) {
 		if (event.keyCode === 13 && !event.ctrlKey) {
 			event.preventDefault();
-			var new_left_height = $o_message.height();
-			sendMessage(new_left_height);
+			sendMessage();
 		}
 		if (event.keyCode === 13 && event.ctrlKey) {
 			$(this).val($input.val() + '\n');
@@ -34,8 +40,34 @@ $(function() {
 	});
 	
 	$('.send').on('click', function() {
-		var new_left_height = $o_message.height();
-		sendMessage(new_left_height);
+		sendMessage();
+	});
+	
+	socket.on('chat', function(data) {
+		var people = data.people;
+		if ($('.nickname').val() === people) { // is you
+			your_message = '<li>' + data.msg + your_nickname + '</li><br>';
+			var right_height = $r_message.height();
+			$r_message.append(your_message);
+			var right_len = $r_message.children('li').length;
+			if ($l_message.height() > right_height) {
+				$r_message.children('li').eq(right_len - 1).css({
+					'margin-top': $l_message.height() - right_height + 24
+				});
+			}
+			$inner.scrollTop($r_message.height());
+		} else { // not you
+			other_message = '<li>' + data.msg + '<i>' + people + '</i></li><br>';
+			var left_height = $l_message.height();
+			$l_message.append(other_message);
+			var left_len = $l_message.children('li').length;
+			if ($r_message.height() > left_height) {
+				$l_message.children('li').eq(left_len - 1).css({
+					'margin-top': $r_message.height() - left_height + 24
+				});
+			}
+			$inner.scrollTop($l_message.height());
+		}
 	});
 	
 	function checkNN() {
@@ -43,27 +75,22 @@ $(function() {
 		if (nn === '') {
 			confirm('CAN YOU ENTER YOUR NICKNAME?');
 		} else {
-			$('.whoiam').html(nn);
+			$('.whoiam .name').html(nn);
 			your_nickname = '<i>' + nn + '</i>';
 			$('.enter_nickname').hide();
 		}
 	}
 	
-	function sendMessage(new_height) {
+	function sendMessage() {
 		if ($input.val() === '') {
 			alert('CANNOT SEND BLANK MESSAGE!');
 		} else {
-			your_message = '<li>' + $input.val() + your_nickname + '</li><br>';
-			$message.append(your_message);
-			var left_height = $o_message.height(),
-				len = $message.children('li').length;
-			if (new_height !== left_height || left_height === 0) {
-				$message.children('li').eq(len - 1).css({
-					'margin-top': left_height + 24
-				});
-			}
-			$inner.scrollTop($message.height());
+			socket.emit('chat', {
+				msg: $input.val(),
+				people: $('.nickname').val()
+			});
 			$input.val('');
+			return false;
 		}
 	}
 	

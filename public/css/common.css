@@ -102,9 +102,9 @@ input[type="radio"] {
 }
 .enter_nickname .confirm,
 .container .text .send {
-	border: 1px solid #ddd;
-	background: #ddd;
-	color: #000;
+	border: 1px solid #26b152;
+	background: #26b152;
+	color: #fff;
 	border-radius: 4px;
 }
 .container {
@@ -125,7 +125,7 @@ input[type="radio"] {
 	line-height: 32px;
 	padding: 12px;
 	/*background: #fff;*/
-	font-size: 18px;
+	font-size: 16px;
 	border-bottom: 1px solid #ddd;
 	margin-top: 80px;
 	cursor: default;
@@ -204,11 +204,9 @@ input[type="radio"] {
 	color: #777;
 }
 .container .messages .left li i {
-	content: 'Jason';
 	left: 6px;
 }
 .container .messages .right li i {
-	/*content: 'Barry';*/
 	right: 6px;
 }
 .container .text {
@@ -225,6 +223,7 @@ input[type="radio"] {
 	border-top: 1px solid #ddd;
 	overflow: auto;
 	border-radius: 0 0 4px 4px;
+	letter-spacing: 0.5px;
 }
 .container .text .send {
 	margin: 0 0 0 16px;

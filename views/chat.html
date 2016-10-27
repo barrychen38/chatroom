@@ -3,23 +3,23 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-	<title>Chat</title>
+	<title>alaChat</title>
 	<link rel="icon" href="/favicon.ico">
 	<link rel="stylesheet" type="text/css" href="/css/normalize.css">
 	<link rel="stylesheet" type="text/css" href="/css/common.css">
 </head>
 <body>
 	
-	<div class="enter_nickname ghost">
+	<div class="enter_nickname">
 		<form>
 			<p>PLEASE ENTER YOUR NICKNAME</p>
-			<input class="nickname" type="text" name="nickname" maxlength="50"><br>
+			<input class="nickname" type="text" name="nickname" maxlength="50" autofocus="autofocus"><br>
 			<input class="confirm" type="button" name="confirm" value="CONFIRM">
 		</form>
 	</div>
 	<div class="container">
 		<div class="wrapper bc">
-			<div class="whoiam bc">Guest</div>
+			<div class="whoiam bc"><span class="name">Guest</span> --- <span class="p_count"></span>人在线</div>
 			<div class="messages bc">
 				<div class="inner clearfix">
 					<ul class="left fl"></ul>
@@ -31,10 +31,11 @@
 				<input class="send" type="button" name="send" value="SEND">
 			</div>
 		</div>
-		<p class="tip">Little Tip: Enter to send, Ctrl + Enter to wrap.</p>
+		<p class="tip">Enter to send, Ctrl + Enter to wrap.</p>
 	</div>
 	
-	<script type="text/javascript" src="/scripts/jquery.min.js"></script>
+	<script type="text/javascript" src="/scripts/lib/jquery.min.js"></script>
+	<script type="text/javascript" src="/scripts/lib/socket.io.js"></script>
 	<script type="text/javascript" src="/scripts/chat.js"></script>
 </body>
 </html>
