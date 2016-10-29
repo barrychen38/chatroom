@@ -1,4 +1,4 @@
-### nodejs_test
+### nodejs_gather
 
 主要是一个聊天的小玩意儿，照着 `socket.io` 官方文档一步步写下来，花了点时间去理解。
 
