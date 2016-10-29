@@ -175,7 +175,9 @@ input[type="radio"] {
 	position: relative;
 	margin-top: 24px;
 	text-align: left;
-	font-size: 14px;
+	font-size: 14px;	
+	white-space: pre-wrap;
+	word-wrap: break-word;
 }
 .container .messages li img {
 	display: block;
@@ -228,6 +230,7 @@ input[type="radio"] {
 	padding: 8px 8px 0;
 	cursor: default;
 	border-top: 1px solid #ddd;
+	position: relative;
 }
 .container .emoji i {
 	margin-right: 12px;
@@ -238,6 +241,38 @@ input[type="radio"] {
 }
 .container .emoji .shake {
 	background-image: url(../img/shake.png);
+}
+.container .emoji .table {
+	width: 300px;
+	position: absolute;
+	top: -140px;
+	left: 6px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 0 0 6px 6px;
+	-webkit-box-shadow: 410px 10px 28px 0 #ddd;
+	box-shadow: 10px 10px 28px 0 #ddd;
+	z-index: 3;
+}
+.container .emoji .table:before,
+.container .emoji .table:after {
+	content: '';
+	display: inline-block;
+	width: 0;
+	height: 0;
+	position: absolute;
+	left: 5px;
+	bottom: -17px;
+	border: 8px solid transparent;
+	border-top-color: #ddd;
+}
+.container .emoji .table:after {
+	bottom: -16px;
+	border-top-color: #fff;
+}
+.container .emoji .table i {
+	float: left;
+	margin: 6px 6px 0 0;
 }
 .container .text {
 	width: 544px;
@@ -320,3 +355,10 @@ input[type="radio"] {
 }
 
 /* animate end */
+
+@media screen and (max-width: 640px) {
+	.enter_nickname,
+	.container {
+		display: none;
+	}
+}
