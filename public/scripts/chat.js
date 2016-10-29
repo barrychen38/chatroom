@@ -1,21 +1,32 @@
 $(function() {
 	
 	window.onbeforeunload = function() {
-		return confirm();
+		// return confirm();
 	}
+	
+	// notification
+	var permission = window.Notification.requestPermission(),
+		checkPermission = window.Notification.permission;
 	
 	var $confirm = $('.confirm'),
 		$nickname = $('.nickname'),
 		$input = $('.input'),
 		$inner = $('.messages .inner'),
 		$l_message = $('.messages .left'),
-		$r_message = $('.messages .right');
+		$r_message = $('.messages .right'),
+		$people = $('.whoiam .p_count'),
+		$shake = $('.emoji .shake'),
+		$emoji_all = $('.emoji .all'),
+		$wrapper = $('.wrapper'),
+		$info = $('.info');
 	
-	var your_nickname = '<i>Guest</i>',
+	var your_nickname = '<dt>Guest</dt>',
 		your_message = '<li>Hello World!' + your_nickname + '</li><br>',
 		other_message;
 	
 	var socket = io();
+	
+	var u_time;
 	
 	$confirm.on('click', function(event) {
 		event.preventDefault();
@@ -43,9 +54,37 @@ $(function() {
 		sendMessage();
 	});
 	
+	// shake
+	var showTimer;
+	$shake.on('click', function() {
+		socket.emit('shake', $('.whoiam .name').text());
+		clearTimeout(showTimer);
+	});
+	socket.on('shake', function(shake) {
+		$wrapper.addClass('animated shake');
+		$info.show();
+		$info.text(shake + ' SHAKED');
+		showTimer = setTimeout(function() {
+			$info.fadeOut(400);
+		}, 900);
+	});
+	$wrapper.on('webkitAnimationEnd animationend', function() {
+		$(this).removeClass('animated shake');
+	});
+	
+	// online
+	socket.on('online', function(people) {
+		$people.text(people);
+	});
+	socket.emit('online');
+	// offline
+	socket.on('offline', function(people) {
+		$people.text(people);
+	});
+	
 	socket.on('chat', function(data) {
-		var people = data.people;
-		if ($('.nickname').val() === people) { // is you
+		var people = data.people.split('_');
+		if ($('.nickname').val() === people[0] && u_time === +people[1]) { // is you
 			your_message = '<li>' + data.msg + your_nickname + '</li><br>';
 			var right_height = $r_message.height();
 			$r_message.append(your_message);
@@ -57,7 +96,13 @@ $(function() {
 			}
 			$inner.scrollTop($r_message.height());
 		} else { // not you
-			other_message = '<li>' + data.msg + '<i>' + people + '</i></li><br>';
+			if (checkPermission === 'granted') {
+				var notify = new Notification(people[0], {
+					body: data.msg,
+					icon: '/img/notify.png'
+				});
+			}
+			other_message = '<li>' + data.msg + '<dt>' + people[0] + '</dt></li><br>';
 			var left_height = $l_message.height();
 			$l_message.append(other_message);
 			var left_len = $l_message.children('li').length;
@@ -71,14 +116,21 @@ $(function() {
 	});
 	
 	function checkNN() {
-		var nn = $('.nickname').val();
-		if (nn === '') {
+		var nn = $('.nickname').val(),
+			len = nn.length,
+			check = nn.match(/\s/g);
+		if (!len) {
 			confirm('CAN YOU ENTER YOUR NICKNAME?');
-		} else {
-			$('.whoiam .name').html(nn);
-			your_nickname = '<i>' + nn + '</i>';
-			$('.enter_nickname').hide();
+			return;
 		}
+		if (check && check.length === len) {
+			confirm('CAN YOU ENTER YOUR NICKNAME?');
+			return;
+		}
+		$('.whoiam .name').html(nn);
+		u_time = new Date().getTime();
+		your_nickname = '<dt>' + nn + '</dt>';
+		$('.enter_nickname').hide();
 	}
 	
 	function sendMessage() {
@@ -87,11 +139,15 @@ $(function() {
 		} else {
 			socket.emit('chat', {
 				msg: $input.val(),
-				people: $('.nickname').val()
+				people: $('.nickname').val() + '_' + u_time
 			});
 			$input.val('');
 			return false;
 		}
+	}
+	
+	function checkMesage(msg) {
+		
 	}
 	
 });

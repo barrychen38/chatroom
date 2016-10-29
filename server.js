@@ -116,9 +116,26 @@ app.post('/register', function(req, res) {
 });
 
 // chat
+var p_count = 0;
 io.on('connection', function(socket) {
+	p_count++;
+	console.log('online people: ' + p_count);
 	socket.on('chat', function(data) {
 		io.emit('chat', data);
+	});
+	socket.on('online', function() {
+		io.emit('online', p_count);
+	});
+	socket.on('offline', function(people) {
+		io.emit('offline', people);
+	});
+	socket.on('shake', function(shake) {
+		io.emit('shake', shake);
+	});
+	socket.on('disconnect', function() {
+		p_count--;
+		console.log('online people: ' + p_count);
+		io.emit('offline', p_count);
 	});
 });
 

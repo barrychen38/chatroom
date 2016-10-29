@@ -6,11 +6,12 @@
 	<title>alaChat</title>
 	<link rel="icon" href="/favicon.ico">
 	<link rel="stylesheet" type="text/css" href="/css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="/css/emoji.css">
 	<link rel="stylesheet" type="text/css" href="/css/common.css">
 </head>
 <body>
 	
-	<div class="enter_nickname">
+	<div class="enter_nickname ghost">
 		<form>
 			<p>PLEASE ENTER YOUR NICKNAME</p>
 			<input class="nickname" type="text" name="nickname" maxlength="50" autofocus="autofocus"><br>
@@ -19,12 +20,21 @@
 	</div>
 	<div class="container">
 		<div class="wrapper bc">
-			<div class="whoiam bc"><span class="name">Guest</span> --- <span class="p_count"></span>人在线</div>
+			<div class="whoiam bc">
+				<span class="name fl">Guest</span>
+				<span class="info"></span>
+				<b class="p_count p_text fr">0</b>
+				<span class="p_text fr">online:&nbsp;&nbsp;</span>
+			</div>
 			<div class="messages bc">
 				<div class="inner clearfix">
 					<ul class="left fl"></ul>
 					<ul class="right fr"></ul>
 				</div>
+			</div>
+			<div class="emoji">
+				<i class="em all"></i><i class="em shake"></i>
+				<div class="table"></div>
 			</div>
 			<div class="text bc">
 				<textarea class="input" autofocus="autofocus" name="input" placeholder="SEND MY MESSAGE"></textarea>

@@ -102,8 +102,8 @@ input[type="radio"] {
 }
 .enter_nickname .confirm,
 .container .text .send {
-	border: 1px solid #26b152;
-	background: #26b152;
+	border: 1px solid #81cc7a;
+	background: #81cc7a;
 	color: #fff;
 	border-radius: 4px;
 }
@@ -123,6 +123,7 @@ input[type="radio"] {
 	width: 520px;
 	height: 32px;
 	line-height: 32px;
+	text-align: center;
 	padding: 12px;
 	/*background: #fff;*/
 	font-size: 16px;
@@ -130,9 +131,16 @@ input[type="radio"] {
 	margin-top: 80px;
 	cursor: default;
 }
+.container .whoiam .p_text {
+	font-size: 14px;
+	color: #777;
+}
+.container .whoiam .info {
+	color: #ef6f67;
+}
 .container .messages {
 	width: 520px;
-	height: 400px;
+	height: 380px;
 	padding: 12px;
 	cursor: default;
 	/*background: #fff;*/
@@ -169,6 +177,11 @@ input[type="radio"] {
 	text-align: left;
 	font-size: 14px;
 }
+.container .messages li img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
 .container .messages .left li {
 	background: #D9F4FE;
 	margin-left: 8px;
@@ -196,18 +209,35 @@ input[type="radio"] {
 	border-left-color: #F3F3F3;
 	right: -16px;
 }
-.container .messages li i {
+.container .messages li dt {
 	display: inline-block;
 	position: absolute;
 	top: -16px;
 	font-size: 11px;
 	color: #777;
 }
-.container .messages .left li i {
+.container .messages .left li dt {
 	left: 6px;
 }
-.container .messages .right li i {
+.container .messages .right li dt {
 	right: 6px;
+}
+.container .emoji {
+	width: 528px;
+	height: 24px;
+	padding: 8px 8px 0;
+	cursor: default;
+	border-top: 1px solid #ddd;
+}
+.container .emoji i {
+	margin-right: 12px;
+	cursor: pointer;
+}
+.container .emoji .all {
+	background-image: url(../img/all.png);
+}
+.container .emoji .shake {
+	background-image: url(../img/shake.png);
 }
 .container .text {
 	width: 544px;
@@ -220,7 +250,6 @@ input[type="radio"] {
 	width: 450px;
 	height: 80px;
 	padding: 12px 82px 12px 12px;
-	border-top: 1px solid #ddd;
 	overflow: auto;
 	border-radius: 0 0 4px 4px;
 	letter-spacing: 0.5px;
@@ -241,3 +270,53 @@ input[type="radio"] {
 	letter-spacing: 0.5px;
 	cursor: default;
 }
+
+/* animate start */
+
+.animated {
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+@-webkit-keyframes shake {
+  from, to {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  10%, 30%, 50%, 70%, 90% {
+    -webkit-transform: translate3d(-12px, 0, 0);
+    transform: translate3d(-12px, 0, 0);
+  }
+
+  20%, 40%, 60%, 80% {
+    -webkit-transform: translate3d(12px, 0, 0);
+    transform: translate3d(12px, 0, 0);
+  }
+}
+
+@keyframes shake {
+  from, to {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  10%, 30%, 50%, 70%, 90% {
+    -webkit-transform: translate3d(-12px, 0, 0);
+    transform: translate3d(-12px, 0, 0);
+  }
+
+  20%, 40%, 60%, 80% {
+    -webkit-transform: translate3d(12px, 0, 0);
+    transform: translate3d(12px, 0, 0);
+  }
+}
+
+.shake {
+  -webkit-animation-name: shake;
+  animation-name: shake;
+}
+
+/* animate end */
