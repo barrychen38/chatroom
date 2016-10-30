@@ -1,7 +1,7 @@
 $(function() {
 	
 	window.onbeforeunload = function() {
-		return confirm();
+		return 1;
 	}
 	
 	// notification
@@ -29,26 +29,25 @@ $(function() {
 	
 	var socket = io();
 	
-	var u_time;
+	var u_time,
+		record_input_emoji_info = 'blank';
 	
 	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum'],
+		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum'],
 		emoji_len = emoji_name.length;
 	
 	for (var i = 0; i < emoji_len; i++) {
 		var i_tag = $('<i></i>');
 		i_tag.addClass(emoji_name[i]);
+		i_tag.attr('title', emoji_input_name[i]);
 		$emoji_table.append(i_tag);
 	}
 	
-	var emoji_choose = $emoji_table.children('i');
+	var $emoji_choose = $emoji_table.children('i');
 	
-	emoji_choose.on('click', function() {
-		// $input.val($input.val() + '<i class="' + emoji_name[$(this).index()] + '"></i> ');
-		// $r_message.append('<li><i class="' + emoji_name[$(this).index()] + '"></i><dt>' + your_nickname + '</dt></li><br>');
-		socket.emit('chat', {
-			msg: '<li><i class="' + emoji_name[$(this).index()] + '"></i><dt>' + your_nickname + '</dt></li><br>',
-			people: $('.nickname').val() + '_' + u_time
-		});
+	$emoji_choose.on('click', function() {
+		$input.val($input.val() + '[' + emoji_input_name[$(this).index()] + ']');
+		record_input_emoji_info = $input.val();
 		$input.focus();
 	});
 	
@@ -123,7 +122,7 @@ $(function() {
 	socket.on('chat', function(data) {
 		var people = data.people.split('_');
 		if ($('.nickname').val() === people[0] && u_time === +people[1]) { // is you
-			your_message = checkMesage(data.msg, your_nickname);
+			your_message = checkMesage(data.msg, data.riei, your_nickname);
 			var right_height = $r_message.height();
 			$r_message.append(your_message);
 			var right_len = $r_message.children('li').length;
@@ -140,7 +139,7 @@ $(function() {
 					icon: '/img/notify.png'
 				});
 			}
-			other_message = checkMesage(data.msg, people[0]);
+			other_message = checkMesage(data.msg, data.riei, people[0]);
 			var left_height = $l_message.height();
 			$l_message.append(other_message);
 			var left_len = $l_message.children('li').length;
@@ -177,6 +176,7 @@ $(function() {
 		} else {
 			socket.emit('chat', {
 				msg: $input.val(),
+				riei: record_input_emoji_info,
 				people: $('.nickname').val() + '_' + u_time
 			});
 			$input.val('');
@@ -184,18 +184,25 @@ $(function() {
 		}
 	}
 	
-	function checkMesage(msg, nn) {
-		var li = $('<li></li><br>');
-		li.eq(0).text(msg);
+	function checkMesage(msg, riei, nn) {
+		record_input_emoji_info = riei;
+		console.info('record_input_emoji_info: ' + record_input_emoji_info);
+		var li = $('<li></li><br>'),
+			emojis = record_input_emoji_info.match(/\[[a-z|_]+\]/g),
+			len = 0;
+		if (emojis !== null) { // have emoji(s)
+			len = emojis.length;
+			for (var i = 0; i < len; i++) { // record emoji(s)
+				if (msg.indexOf(emojis[i]) !== -1) {
+					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z|_]+/g)[0] + '"></i>');
+				}
+			}
+			li.eq(0).append(msg);
+		} else { // no emoji(s)
+			li.eq(0).text(msg);
+		}
 		li.eq(0).append('<dt>' + nn + '</dt>');
 		return li;
 	}
-	
-	// function emCheck(msg, name) {
-	// 	var emReg = new RegExp('(^|(<i class="em em-))' + '*' + '("></i>)$', 'g'),
-	// 		r = msg.match(emReg);
-	// 	if (r !== null) return r;
-	// 	return null;
-	// }
 	
 });
