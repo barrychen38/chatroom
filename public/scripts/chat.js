@@ -125,6 +125,7 @@ $(function() {
 			your_message = checkMesage(data.msg, data.riei, your_nickname);
 			var right_height = $r_message.height();
 			$r_message.append(your_message);
+			$emoji_table.addClass('ghost');
 			var right_len = $r_message.children('li').length;
 			if ($l_message.height() > right_height) {
 				$r_message.children('li').eq(right_len - 1).css({
@@ -142,6 +143,7 @@ $(function() {
 			other_message = checkMesage(data.msg, data.riei, people[0]);
 			var left_height = $l_message.height();
 			$l_message.append(other_message);
+			$emoji_table.addClass('ghost');
 			var left_len = $l_message.children('li').length;
 			if ($r_message.height() > left_height) {
 				$l_message.children('li').eq(left_len - 1).css({
@@ -192,6 +194,10 @@ $(function() {
 			len = 0;
 		if (emojis !== null) { // have emoji(s)
 			len = emojis.length;
+			if (msg.indexOf('<') !== -1 || msg.indexOf('>') !== -1) {
+				msg = msg.replace(/<+/g, '&lt;');
+				msg = msg.replace(/>+/g, '&gt;');
+			}
 			for (var i = 0; i < len; i++) { // record emoji(s)
 				if (msg.indexOf(emojis[i]) !== -1) {
 					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z|_]+/g)[0] + '"></i>');

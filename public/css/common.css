@@ -211,17 +211,17 @@ input[type="radio"] {
 	border-left-color: #F3F3F3;
 	right: -16px;
 }
-.container .messages li dt {
+.container .messages li dt:last-child {
 	display: inline-block;
 	position: absolute;
 	top: -16px;
 	font-size: 11px;
 	color: #777;
 }
-.container .messages .left li dt {
+.container .messages .left li dt:last-child {
 	left: 6px;
 }
-.container .messages .right li dt {
+.container .messages .right li dt:last-child {
 	right: 6px;
 }
 .container .emoji {
@@ -244,6 +244,7 @@ input[type="radio"] {
 }
 .container .emoji .table {
 	width: 300px;
+	background: #fff;
 	position: absolute;
 	top: -140px;
 	left: 6px;
