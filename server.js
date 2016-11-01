@@ -139,6 +139,33 @@ io.on('connection', function(socket) {
 	});
 });
 
+// get chat history
+app.get('/getChatHistory', function(req, res) {
+	
+	pool.getConnection(function(err, connection) {
+		if (err) {
+			console.error('MYSQL CONNECT ERROR.');
+			res.send(JSON.stringify({result: 0}));
+			return;
+		}
+		connection.query('SELECT * FROM save_chat', function(err, rows) {
+			if (err) {
+				console.error('SELECT SQL ERROR.');
+				res.send(JSON.stringify({result: 0}));
+				return;
+			}
+			res.send(JSON.stringify({result: 1, data: rows}));
+			connection.release();
+		});
+	});
+	
+});
+
+// save chat
+app.post('/saveChat', function(req, res) {
+	
+});
+
 server.listen(port, function() {
 	console.log('Server is running at 127.0.0.1:' + port);
 });

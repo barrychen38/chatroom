@@ -1,5 +1,27 @@
 $(function() {
 	
+	/**
+	 * get chat history
+	 * @pos: 1 => left(others), 2 => right(myself)
+	 * @id: 0-9, only save 10 messages, up to bottom
+	 * @msg: message
+	 * @name: last time user's nickname
+	 */
+	$.ajax({
+		url: '/getChatHistory',
+		type: 'GET',
+		dataType: 'json',
+		success: function(data) {
+			var rs = data.result;
+			if (rs === 0) {
+				console.error('Get chat history failed.');
+			}
+			if (rs === 1) {
+				
+			}
+		}
+	});
+	
 	window.onbeforeunload = function() {
 		return 1;
 	}
