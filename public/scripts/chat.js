@@ -1,37 +1,5 @@
 $(function() {
 	
-	/**
-	 * get chat history
-	 * @pos: 1 => left(others), 2 => right(myself)
-	 * @id: 0-9, only save 10 messages, up to bottom
-	 * @msg: message
-	 * @name: last time user's nickname
-	 */
-	$.ajax({
-		url: '/getChatHistory',
-		type: 'GET',
-		dataType: 'json',
-		success: function(data) {
-			var rs = data.result;
-			if (rs === 0) {
-				console.error('Get chat history failed.');
-			}
-			if (rs === 1) {
-				
-			}
-		}
-	});
-	
-	window.onbeforeunload = function() {
-		return 1;
-	}
-	
-	// notification
-	if ('Notification' in window) {
-		var permission = window.Notification.requestPermission(),
-			checkPermission = window.Notification.permission;
-	}
-	
 	var $confirm = $('.confirm'),
 		$nickname = $('.nickname'),
 		$input = $('.input'),
@@ -47,7 +15,9 @@ $(function() {
 	
 	var your_nickname,
 		your_message,
-		other_message;
+		other_message,
+		your_old_name,
+		save_chat_history = [];
 	
 	var socket = io();
 	
@@ -58,6 +28,38 @@ $(function() {
 	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-scream', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum', 'em em-mask', 'em em-boy', 'em em-alien', 'em em-clap', 'em em-facepunch', 'em em-girl', 'em em-imp', 'em em-monkey_face', 'em em-octocat', 'em em-rage', 'em em-see_no_evil', 'em em-smiling_imp', 'em em-speak_no_evil', 'em em-thumbsup', 'em em-thumbsdown', 'em em-v', 'em em-trollface', 'em em-dog', 'em em-broken_heart'],
 		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
 		emoji_len = emoji_name.length;
+	
+	window.onbeforeunload = function() {
+		return 1;
+	}
+	
+	// notification
+	if ('Notification' in window) {
+		var permission = window.Notification.requestPermission(),
+			checkPermission = window.Notification.permission;
+	}
+	
+	/**
+	 * get chat history
+	 * @pos: 1 => left(others), 2 => right(myself)
+	 * @id: 0-9, only save 10 messages, up to bottom
+	 * @msg: message
+	 * @name: last time user's nickname
+	 */
+	$.ajax({
+		url: '/get_chat_history',
+		type: 'GET',
+		dataType: 'json',
+		success: function(data) {
+			var result = data.result;
+			if (result === 0) {
+				console.error('Get chat history failed.');
+			}
+			if (result === 1) {
+				
+			}
+		}
+	});
 	
 	for (var i = 0; i < emoji_len; i++) {
 		var i_tag = $('<i></i>');
@@ -141,11 +143,15 @@ $(function() {
 	socket.on('offline', function(people) {
 		$people.text(people);
 	});
+	// save chat
+	socket.on('save_chat', saveChat);
 	
 	socket.on('chat', function(data) {
-		var people = data.people.split('_');
+		var people = data.people.split('_'),
+			pos = null;
 		if ($('.nickname').val() === people[0] && u_time === +people[1]) { // is you
-			your_message = checkMesage(data.msg, data.riei, your_nickname);
+			pos = 2;
+			your_message = checkMesage(data.msg, data.riei, 'Me');
 			var right_height = $r_message.height();
 			$r_message.append(your_message);
 			$emoji_table.addClass('ghost');
@@ -163,6 +169,7 @@ $(function() {
 					icon: '/img/notify.png'
 				});
 			}
+			pos = 1;
 			other_message = checkMesage(data.msg, data.riei, people[0]);
 			var left_height = $l_message.height();
 			$l_message.append(other_message);
@@ -175,6 +182,13 @@ $(function() {
 			}
 			$inner.scrollTop($l_message.height());
 		}
+		save_chat_history.push({
+			msg: data.msg,
+			pos: pos,
+			name: people
+		});
+		if (save_chat_history.length >= 10)
+			save_chat_history.length = 10;
 	});
 	
 	function checkNN() {
@@ -182,16 +196,25 @@ $(function() {
 			len = nn.length,
 			check = nn.match(/\s/g);
 		if (!len) {
-			confirm('PLEASE ENTER YOUR NICKNAME!');
+			alert('PLEASE ENTER YOUR NICKNAME!');
 			return;
 		}
 		if (check && check.length === len) {
-			confirm('NICKNAME CANNOT BE ALL SPACES!');
+			alert('NICKNAME CANNOT BE ALL SPACES!');
 			return;
 		}
 		$('.whoiam .name').text(nn);
 		u_time = new Date().getTime();
 		your_nickname = nn;
+		// save now your name to recover msg
+		if (!localStorage.getItem('nickname')) {
+			localStorage.setItem('nickname', your_nickname + '_' + u_time);
+			your_old_name = your_nickname;
+		} else {
+			your_old_name = localStorage.getItem('nickname');
+			localStorage.setItem('nickname', your_nickname + '_' + u_time);
+		}
+		console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
 		$('.enter_nickname').hide();
 	}
 	
@@ -202,7 +225,7 @@ $(function() {
 			socket.emit('chat', {
 				msg: $input.val(),
 				riei: record_input_emoji_info,
-				people: $('.nickname').val() + '_' + u_time
+				people: your_nickname + '_' + u_time
 			});
 			$input.val('');
 			return false;
@@ -213,7 +236,7 @@ $(function() {
 		record_input_emoji_info = riei;
 		console.info('record_input_emoji_info: ' + record_input_emoji_info);
 		var li = $('<li></li><br>'),
-			emojis = record_input_emoji_info.match(/\[[a-z|_]+\]/g),
+			emojis = record_input_emoji_info.match(/\[[a-z_]+\]/g),
 			len = 0;
 		if (emojis !== null) { // have emoji(s)
 			len = emojis.length;
@@ -223,7 +246,7 @@ $(function() {
 			}
 			for (var i = 0; i < len; i++) { // record emoji(s)
 				if (msg.indexOf(emojis[i]) !== -1) {
-					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z|_]+/g)[0] + '"></i>');
+					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
 				}
 			}
 			li.eq(0).append(msg);
@@ -232,6 +255,21 @@ $(function() {
 		}
 		li.eq(0).append('<dt>' + nn + '</dt>');
 		return li;
+	}
+	
+	function recoverMsg(id, name, msg, pos) {
+		
+	}
+	
+	function saveChat() {
+		$.ajax({
+			url: '/save_chat',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				history: save_chat_history
+			}
+		});
 	}
 	
 });

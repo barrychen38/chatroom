@@ -119,20 +119,23 @@ io.on('connection', function(socket) {
 	socket.on('online', function() {
 		io.emit('online', p_count);
 	});
-	socket.on('offline', function(people) {
-		io.emit('offline', people);
-	});
+	// socket.on('offline', function(people) {
+	// 	io.emit('offline', people);
+	// });
 	socket.on('shake', function(shake) {
 		io.emit('shake', shake);
 	});
 	socket.on('disconnect', function() {
 		p_count--;
+		if (p_count === 0) {
+			io.emit('save_chat');
+		}
 		console.log('online people: ' + p_count);
 		io.emit('offline', p_count);
 	});
 });
 // get chat history
-app.get('/getChatHistory', function(req, res) {
+app.get('/get_chat_history', function(req, res) {
 	
 	pool.getConnection(function(err, connection) {
 		if (err) {
@@ -151,7 +154,7 @@ app.get('/getChatHistory', function(req, res) {
 	
 });
 // save chat
-app.post('/saveChat', function(req, res) {
+app.post('/save_chat', function(req, res) {
 	
 });
 // run server
