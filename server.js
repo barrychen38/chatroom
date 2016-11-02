@@ -1,52 +1,52 @@
+// modules
 var express = require('express'),
 	http = require('http'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs'),
 	mysql = require('mysql'),
 	favicon = require('serve-favicon');
-
-// file module
+// routes
 var login = require('./routes/login'),
 	register = require('./routes/register'),
-	chat = require('./routes/chat'),
-	mysql_config = require('./config/config').config;
-
+	chat = require('./routes/chat');
+// config
+var mysql_config = require('./config/config').config;
+// utils
+var errMsg = require('./utils/errmsg'),
+	sqlQuery = require('./utils/query');
+// port
 var port = process.env.PORT || 3000;
-
+// server
 var app = express(),
 	server = http.createServer(app),
 	io = require('socket.io')(server);
-
+// engine
 app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
+// favicon
 app.use(favicon(__dirname + '/public/favicon.ico'));
+// static files
 app.use(express.static(__dirname + '/public'));
-
+// use routes
 app.use('/login', login);
 app.use('/register', register);
 app.use('/chat', chat);
-
+// parse request body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-
-// mysql pool
+// create mysql pool
 var pool = mysql.createPool(mysql_config);
-
-var count_people = 0;
-
 // get info
 app.get('/getInfo', function(req, res) {
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			console.error('MYSQL CONNECT ERROR.');
-			res.send(JSON.stringify({result: 0}));
+			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query('SELECT * FROM user', function(err, rows) {
+		connection.query(sqlQuery.select_user, function(err, rows) {
 			if (err) {
-				console.error('SELECT SQL ERROR.');
-				res.send(JSON.stringify({result: 0}));
+				res.send(JSON.stringify(errMsg.sql_select_error));
 				return;
 			}
 			res.send(JSON.stringify({result: 1, data: rows}));
@@ -54,20 +54,17 @@ app.get('/getInfo', function(req, res) {
 		});
 	});
 });
-
 // login
 app.post('/loginConfirm', function(req, res) {
 	var request = req.body;
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			console.error('MYSQL CONNECT ERROR.');
-			res.send(JSON.stringify({result: 0}));
+			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query('SELECT * FROM user WHERE email = ?', [request.name], function(err, rows) {
+		connection.query(sqlQuery.select_user_where_email, [request.name], function(err, rows) {
 			if (err) {
-				console.error('SELECT SQL ERROR.');
-				res.send(JSON.stringify({result: 0}));
+				res.send(JSON.stringify(errMsg.sql_select_error));
 				return;
 			}
 			if (rows.length) {
@@ -83,23 +80,20 @@ app.post('/loginConfirm', function(req, res) {
 		});
 	});
 });
-
 // register
 app.post('/register', function(req, res) {
 	var request = req.body,
 		values = [request.name, request.mobile, request.password, request.email, request.uid];
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			console.error('MYSQL CONNECT ERROR.');
-			res.send(JSON.stringify({result: 0}));
+			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
 		connection.query('SELECT mobile,email FROM user WHERE uid = ?', [request.uid], function(err, rows) {
 			if (rows.length) {
 				connection.query('UPDATE user SET name = ?, mobile = ?, pwd = ?, email = ? WHERE uid = ?', values, function(err, results) {
 					if (err) {
-						console.error('UPDATE SQL ERROR.');
-						res.send(JSON.stringify({result: 0}));
+						res.send(JSON.stringify(errMsg.sql_update_error));
 						return;
 					}
 					res.send(JSON.stringify({result: 2}));
@@ -114,7 +108,6 @@ app.post('/register', function(req, res) {
 		});
 	});
 });
-
 // chat
 var p_count = 0;
 io.on('connection', function(socket) {
@@ -138,20 +131,17 @@ io.on('connection', function(socket) {
 		io.emit('offline', p_count);
 	});
 });
-
 // get chat history
 app.get('/getChatHistory', function(req, res) {
 	
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			console.error('MYSQL CONNECT ERROR.');
-			res.send(JSON.stringify({result: 0}));
+			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query('SELECT * FROM save_chat', function(err, rows) {
+		connection.query(sqlQuery.select_save_chat, function(err, rows) {
 			if (err) {
-				console.error('SELECT SQL ERROR.');
-				res.send(JSON.stringify({result: 0}));
+				res.send(JSON.stringify(errMsg.sql_select_error));
 				return;
 			}
 			res.send(JSON.stringify({result: 1, data: rows}));
@@ -160,12 +150,11 @@ app.get('/getChatHistory', function(req, res) {
 	});
 	
 });
-
 // save chat
 app.post('/saveChat', function(req, res) {
 	
 });
-
+// run server
 server.listen(port, function() {
 	console.log('Server is running at 127.0.0.1:' + port);
 });
