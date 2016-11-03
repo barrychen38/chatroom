@@ -33,7 +33,7 @@ $(function() {
 		return 1;
 	}
 	
-	// notification
+	// check notification
 	if ('Notification' in window) {
 		var permission = window.Notification.requestPermission(),
 			checkPermission = window.Notification.permission;

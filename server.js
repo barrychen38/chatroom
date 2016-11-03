@@ -136,7 +136,6 @@ io.on('connection', function(socket) {
 });
 // get chat history
 app.get('/get_chat_history', function(req, res) {
-	
 	pool.getConnection(function(err, connection) {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
