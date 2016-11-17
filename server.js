@@ -135,6 +135,9 @@ io.on('connection', (socket) => {
 	socket.on('shake', shake => {
 		io.emit('shake', shake);
 	});
+	socket.on('send_image', data => {
+		io.emit('send_image', data);
+	});
 	socket.on('disconnect', () => {
 		p_count--;
 		if (p_count === 0) {

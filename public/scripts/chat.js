@@ -31,7 +31,7 @@ $(function() {
 		emoji_len = emoji_name.length;
 	
 	window.onbeforeunload = function() {
-		// return 1;
+		return 1;
 	}
 	
 	// check notification
@@ -112,7 +112,7 @@ $(function() {
 		reader.readAsDataURL(file);
 		reader.onload = function() {
 			sendImage(this.result);
-			$(this).val('');
+			$send_image.val('');
 		}
 	});
 	
@@ -205,6 +205,43 @@ $(function() {
 			save_chat_history.length = 10;
 	});
 	
+	socket.on('send_image', function(data) {
+		var people = data.people.split('_');
+		if ($('.nickname').val() === people[0] && u_time === +people[1]) { // is you
+			var right_height = $r_message.height();
+			preloadImage(data.img_url, function() {
+				$r_message.append('<li><img src="' + data.img_url + '"><dt>Me</dt></li>');
+				var right_len = $r_message.children('li').length;
+				if ($l_message.height() > right_height) {
+					$r_message.children('li').eq(right_len - 1).css({
+						'margin-top': $l_message.height() - right_height + 24
+					});
+				}
+				$inner.scrollTop($r_message.height());
+				$send_image.removeAttr('disabled');
+			});
+		} else {
+			if (checkPermission === 'granted') {
+				var notify = new Notification(people[0], {
+					body: 'Send a photo in Group Chat.',
+					icon: '/img/notify.png'
+				});
+			}
+			var left_height = $l_message.height();
+			preloadImage(data.img_url, function() {
+				$l_message.append('<li><img src="' + data.img_url + '"><dt>' + people[0] + '</dt></li>');
+				var left_len = $l_message.children('li').length;
+				if ($r_message.height() > left_height) {
+					$l_message.children('li').eq(left_len - 1).css({
+						'margin-top': $r_message.height() - left_height + 24
+					});
+				}
+				$inner.scrollTop($l_message.height());
+				$send_image.removeAttr('disabled');
+			});
+		}
+	});
+	
 	function checkNickName() {
 		var nn = $('.nickname').val(),
 			len = nn.length,
@@ -282,10 +319,9 @@ $(function() {
 			success: function(data) {
 				var result = data.readState;
 				if (result === 1) {
-					preloadImage(data.img_url, function() {
-						$r_message.append('<li><img src="' + data.img_url + '"><dt>' + $('.nickname').val() + '</dt></li>');
-						$inner.scrollTop($r_message.height());
-						$send_image.removeAttr('disabled');
+					socket.emit('send_image', {
+						img_url: data.img_url,
+						people: your_nickname + '_' + u_time
 					});
 				}
 			}
