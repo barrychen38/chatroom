@@ -4,7 +4,9 @@ var express = require('express'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs'),
 	mysql = require('mysql'),
-	favicon = require('serve-favicon');
+	favicon = require('serve-favicon'),
+	uuid = require('uuid'),
+	fs = require('fs');
 // routes
 var login = require('./routes/login'),
 	register = require('./routes/register'),
@@ -33,18 +35,26 @@ app.use('/login', login);
 app.use('/register', register);
 app.use('/chat', chat);
 // parse request body
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json({limit: 1024*1024*5}));
+app.use(bodyParser.urlencoded({extended: true, limit: 1024*1024*5}));
+// apply all
+app.all('*', (req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	res.header("Access-Control-Allow-Methods", "GET,POST");
+	// res.header("Content-Type", "application/json;charset=utf-8");
+	next();
+});
 // create mysql pool
 var pool = mysql.createPool(mysql_config);
 // get info
-app.get('/getInfo', function(req, res) {
-	pool.getConnection(function(err, connection) {
+app.get('/getInfo', (req, res) => {
+	pool.getConnection((err, connection) => {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query(sqlQuery.select_user, function(err, rows) {
+		connection.query(sqlQuery.select_user, (err, rows) => {
 			if (err) {
 				res.send(JSON.stringify(errMsg.sql_select_error));
 				return;
@@ -55,14 +65,14 @@ app.get('/getInfo', function(req, res) {
 	});
 });
 // login
-app.post('/loginConfirm', function(req, res) {
+app.post('/loginConfirm', (req, res) => {
 	var request = req.body;
-	pool.getConnection(function(err, connection) {
+	pool.getConnection((err, connection) => {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query(sqlQuery.select_user_where_email, [request.name], function(err, rows) {
+		connection.query(sqlQuery.select_user_where_email, [request.name], (err, rows) => {
 			if (err) {
 				res.send(JSON.stringify(errMsg.sql_select_error));
 				return;
@@ -81,17 +91,17 @@ app.post('/loginConfirm', function(req, res) {
 	});
 });
 // register
-app.post('/register', function(req, res) {
+app.post('/register', (req, res) => {
 	var request = req.body,
 		values = [request.name, request.mobile, request.password, request.email, request.uid];
-	pool.getConnection(function(err, connection) {
+	pool.getConnection((err, connection) => {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query('SELECT mobile,email FROM user WHERE uid = ?', [request.uid], function(err, rows) {
+		connection.query('SELECT mobile,email FROM user WHERE uid = ?', [request.uid], (err, rows) => {
 			if (rows.length) {
-				connection.query('UPDATE user SET name = ?, mobile = ?, pwd = ?, email = ? WHERE uid = ?', values, function(err, results) {
+				connection.query('UPDATE user SET name = ?, mobile = ?, pwd = ?, email = ? WHERE uid = ?', values, (err, results) => {
 					if (err) {
 						res.send(JSON.stringify(errMsg.sql_update_error));
 						return;
@@ -100,7 +110,7 @@ app.post('/register', function(req, res) {
 					connection.release();
 				});
 			} else {
-				connection.query('INSERT INTO user VALUES(?, ?, ?, ?, ?)', values, function(err, result) {
+				connection.query('INSERT INTO user VALUES(?, ?, ?, ?, ?)', values, (err, result) => {
 					res.send(JSON.stringify({result: 1}));
 					connection.release();
 				});
@@ -110,22 +120,22 @@ app.post('/register', function(req, res) {
 });
 // chat
 var p_count = 0;
-io.on('connection', function(socket) {
+io.on('connection', (socket) => {
 	p_count++;
 	console.log('online people: ' + p_count);
-	socket.on('chat', function(data) {
+	socket.on('chat', (data) => {
 		io.emit('chat', data);
 	});
-	socket.on('online', function() {
+	socket.on('online', ()=> {
 		io.emit('online', p_count);
 	});
-	// socket.on('offline', function(people) {
+	// socket.on('offline', people => {
 	// 	io.emit('offline', people);
 	// });
-	socket.on('shake', function(shake) {
+	socket.on('shake', shake => {
 		io.emit('shake', shake);
 	});
-	socket.on('disconnect', function() {
+	socket.on('disconnect', () => {
 		p_count--;
 		if (p_count === 0) {
 			io.emit('save_chat');
@@ -134,14 +144,30 @@ io.on('connection', function(socket) {
 		io.emit('offline', p_count);
 	});
 });
+// save image return to client
+app.post('/upload_image', (req, res) => {
+	var r = req.body;
+	
+	var ext = r.file.substr(0, 22).match(/(jpg|jpeg|png|gif)/)[0],
+		file = r.file.substr(22);
+	var file_name = uuid.v1({msec: new Date().getTime()}) + '.' + ext;
+	
+	fs.writeFile('public/upload/' + file_name, new Buffer(file, 'base64'), err => {
+		if (err) {
+			res.send(JSON.stringify({readState: 0, msg: 'Upload failed.'}));
+			return;
+		}
+	});
+	res.send(JSON.stringify({readState: 1, img_url: '/upload/' + file_name}));
+});
 // get chat history
-app.get('/get_chat_history', function(req, res) {
-	pool.getConnection(function(err, connection) {
+app.get('/get_chat_history', (req, res) => {
+	pool.getConnection((err, connection) => {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
 			return;
 		}
-		connection.query(sqlQuery.select_save_chat, function(err, rows) {
+		connection.query(sqlQuery.select_save_chat, (err, rows) => {
 			if (err) {
 				res.send(JSON.stringify(errMsg.sql_select_error));
 				return;
@@ -153,10 +179,10 @@ app.get('/get_chat_history', function(req, res) {
 	
 });
 // save chat
-app.post('/save_chat', function(req, res) {
+app.post('/save_chat', (req, res) => {
 	
 });
 // run server
-server.listen(port, function() {
+server.listen(port, () => {
 	console.log('Server is running at 127.0.0.1:' + port);
 });

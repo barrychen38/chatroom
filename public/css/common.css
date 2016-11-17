@@ -242,6 +242,22 @@ input[type="radio"] {
 .container .emoji .shake {
 	background-image: url(../img/shake.png);
 }
+.container .emoji .image {
+	background-image: url(../img/image.png);
+	position: relative;
+}
+.container .emoji .image .file {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	z-index: 2;
+}
 .container .emoji .table {
 	width: 300px;
 	background: #fff;

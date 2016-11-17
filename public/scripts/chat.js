@@ -8,6 +8,7 @@ $(function() {
 		$r_message = $('.messages .right'),
 		$people = $('.whoiam .p_count'),
 		$shake = $('.emoji .shake'),
+		$send_image = $('.emoji .file'),
 		$emoji_all = $('.emoji .all'),
 		$emoji_table = $('.emoji .table'),
 		$wrapper = $('.wrapper'),
@@ -30,7 +31,7 @@ $(function() {
 		emoji_len = emoji_name.length;
 	
 	window.onbeforeunload = function() {
-		return 1;
+		// return 1;
 	}
 	
 	// check notification
@@ -46,20 +47,20 @@ $(function() {
 	 * @msg: message
 	 * @name: last time user's nickname
 	 */
-	$.ajax({
-		url: '/get_chat_history',
-		type: 'GET',
-		dataType: 'json',
-		success: function(data) {
-			var result = data.result;
-			if (result === 0) {
-				console.error('Get chat history failed.');
-			}
-			if (result === 1) {
+	// $.ajax({
+	// 	url: '/get_chat_history',
+	// 	type: 'GET',
+	// 	dataType: 'json',
+	// 	success: function(data) {
+	// 		var result = data.result;
+	// 		if (result === 0) {
+	// 			console.error('Get chat history failed.');
+	// 		}
+	// 		if (result === 1) {
 				
-			}
-		}
-	});
+	// 		}
+	// 	}
+	// });
 	
 	for (var i = 0; i < emoji_len; i++) {
 		var i_tag = $('<i></i>');
@@ -102,6 +103,19 @@ $(function() {
 		sendMessage();
 	});
 	
+	var reader = new FileReader();
+	
+	// send image
+	$send_image.on('change', function(event) {
+		$(this).attr('disabled');
+		var file = event.target.files[0];
+		reader.readAsDataURL(file);
+		reader.onload = function() {
+			sendImage(this.result);
+			$(this).val('');
+		}
+	});
+	
 	// shake
 	var showTimer;
 	$shake.on('click', function() {
@@ -131,7 +145,7 @@ $(function() {
 		if (!$emoji_table.hasClass('ghost') && event.target !== $emoji_all[0]) {
 			$emoji_table.addClass('ghost');
 		}
-		return false;
+		// return false;
 	});
 	
 	// online
@@ -255,6 +269,25 @@ $(function() {
 		}
 		li.eq(0).append('<dt>' + nn + '</dt>');
 		return li;
+	}
+	
+	function sendImage(file) {
+		$.ajax({
+			url: '/upload_image',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				file: file
+			},
+			success: function(data) {
+				var result = data.readState;
+				if (result === 1) {
+					$r_message.append('<li><img src="' + data.img_url + '"><dt>' + $('.nickname').val() + '</dt></li>');
+					$inner.scrollTop($r_message.height());
+					$send_image.removeAttr('disabled');
+				}
+			}
+		});
 	}
 	
 	function recoverMsg(id, name, msg, pos) {
