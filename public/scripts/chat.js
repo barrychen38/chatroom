@@ -79,13 +79,13 @@ $(function() {
 	
 	$confirm.on('click', function(event) {
 		event.preventDefault();
-		checkNN();
+		checkNickName();
 	});
 	
 	$nickname.on('keydown', function(event) {
 		if (event.keyCode === 13) {
 			event.preventDefault();
-			checkNN();
+			checkNickName();
 		}
 	});
 	
@@ -205,7 +205,7 @@ $(function() {
 			save_chat_history.length = 10;
 	});
 	
-	function checkNN() {
+	function checkNickName() {
 		var nn = $('.nickname').val(),
 			len = nn.length,
 			check = nn.match(/\s/g);
@@ -282,27 +282,22 @@ $(function() {
 			success: function(data) {
 				var result = data.readState;
 				if (result === 1) {
-					$r_message.append('<li><img src="' + data.img_url + '"><dt>' + $('.nickname').val() + '</dt></li>');
-					$inner.scrollTop($r_message.height());
-					$send_image.removeAttr('disabled');
+					preloadImage(data.img_url, function() {
+						$r_message.append('<li><img src="' + data.img_url + '"><dt>' + $('.nickname').val() + '</dt></li>');
+						$inner.scrollTop($r_message.height());
+						$send_image.removeAttr('disabled');
+					});
 				}
 			}
 		});
 	}
 	
-	function recoverMsg(id, name, msg, pos) {
-		
-	}
-	
-	function saveChat() {
-		$.ajax({
-			url: '/save_chat',
-			type: 'POST',
-			dataType: 'json',
-			data: {
-				history: save_chat_history
-			}
-		});
+	function preloadImage(src, fn) {
+		var image = new Image();
+		image.src = src;
+		image.onload = function() {
+			fn && fn();
+		}
 	}
 	
 });
