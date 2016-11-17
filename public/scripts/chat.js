@@ -158,7 +158,7 @@ $(function() {
 		$people.text(people);
 	});
 	// save chat
-	socket.on('save_chat', saveChat);
+	// socket.on('save_chat', saveChat);
 	
 	socket.on('chat', function(data) {
 		var people = data.people.split('_'),
