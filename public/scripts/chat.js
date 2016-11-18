@@ -107,8 +107,11 @@ $(function() {
 	
 	// send image
 	$send_image.on('change', function(event) {
-		$(this).attr('disabled');
 		var file = event.target.files[0];
+		if (file.size > 1024*1024*5) {
+			alert('Please upload a photo less than 5MB.');
+		}
+		$(this).attr('disabled');
 		reader.readAsDataURL(file);
 		reader.onload = function() {
 			sendImage(this.result);
