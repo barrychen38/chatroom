@@ -2,7 +2,6 @@
 var express = require('express'),
 	http = require('http'),
 	bodyParser = require('body-parser'),
-	ejs = require('ejs'),
 	jade = require('jade'),
 	mysql = require('mysql'),
 	favicon = require('serve-favicon'),
@@ -24,9 +23,9 @@ var app = express(),
 	server = http.createServer(app),
 	io = require('socket.io')(server);
 // engine
-app.engine('html', ejs.__express);
+// app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
-app.set('view engine', 'html');
+app.set('view engine', 'jade');
 // favicon
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // static files
