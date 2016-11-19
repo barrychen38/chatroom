@@ -31,7 +31,7 @@ $(function() {
 		emoji_len = emoji_name.length;
 	
 	window.onbeforeunload = function() {
-		return 1;
+		// return 1;
 	}
 	
 	// check notification
@@ -110,6 +110,7 @@ $(function() {
 		var file = event.target.files[0];
 		if (file.size > 1024*1024*5) {
 			alert('Please upload a photo less than 5MB.');
+			return;
 		}
 		$(this).attr('disabled');
 		reader.readAsDataURL(file);
