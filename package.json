@@ -1,13 +1,14 @@
 {
-  "name": "test",
+  "name": "nodejs_chat-room",
   "version": "1.0.0",
-  "description": "test",
+  "description": "A chat room based on nodejs",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "test"
+    "nodejs",
+    "chat"
   ],
   "author": "funnychen38",
   "license": "ISC",

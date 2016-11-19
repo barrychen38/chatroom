@@ -1,0 +1,26 @@
+{
+  "name": "nodejs_chat-room",
+  "description": "A chat room based on nodejs",
+  "main": "server.js",
+  "authors": [
+    "funnychen38"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "nodejs",
+    "chat"
+  ],
+  "homepage": "https://github.com/Chen38/nodejs_test",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vue": "^2.0.7",
+    "jquery": "^3.1.1"
+  }
+}

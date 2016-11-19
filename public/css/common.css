@@ -39,6 +39,10 @@ html, body {
 	display: none;
 }
 
+[v-cloak] {
+	display: none;
+}
+
 /* login */
 .login, .register {
 	text-align: center;

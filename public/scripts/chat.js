@@ -31,7 +31,7 @@ $(function() {
 		emoji_len = emoji_name.length;
 	
 	window.onbeforeunload = function() {
-		return 1;
+		// return 1;
 	}
 	
 	// check notification
@@ -47,20 +47,6 @@ $(function() {
 	 * @msg: message
 	 * @name: last time user's nickname
 	 */
-	// $.ajax({
-	// 	url: '/get_chat_history',
-	// 	type: 'GET',
-	// 	dataType: 'json',
-	// 	success: function(data) {
-	// 		var result = data.result;
-	// 		if (result === 0) {
-	// 			console.error('Get chat history failed.');
-	// 		}
-	// 		if (result === 1) {
-				
-	// 		}
-	// 	}
-	// });
 	
 	for (var i = 0; i < emoji_len; i++) {
 		var i_tag = $('<i></i>');
@@ -271,6 +257,11 @@ $(function() {
 		}
 		console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
 		$('.enter_nickname').hide();
+		if (!location.hash) {
+			location.href += '#nickname=' + your_nickname + '_' + u_time;
+		} else {
+			location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + u_time;
+		}
 	}
 	
 	function sendMessage() {

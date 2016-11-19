@@ -3,12 +3,12 @@ html(lang="en")
 	head
 		meta(charset="UTF-8")
 		meta(name="viewport", content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no")
-		title ALAChat
+		title AlaChat
 		link(rel="icon", href="/faviocn.ico")
 		link(rel="stylesheet", href="/css/normalize.css")
 		link(rel="stylesheet", href="/css/emoji.css")
 		link(rel="stylesheet", href="/css/common.css")
-	body
+	body#app
 		.enter_nickname
 			form
 				p PLEASE ENTER YOUR NAME
@@ -25,7 +25,7 @@ html(lang="en")
 				.messages.bc
 					.inner.clearfix
 						ul.left.fl
-						ul.right.gr
+						ul.right.fr
 				.emoji
 					i.em.all
 					i.em.shake
@@ -36,6 +36,8 @@ html(lang="en")
 					textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus)
 					input.send(type="button", name="send", value='SEND')
 			p.tip Enter to send, Ctrl + Enter to wrap.
-		script(type="text/javascript" src="/scripts/lib/jquery.min.js")
-		script(type="text/javascript" src="/scripts/lib/socket.io.js")
+		script(type="text/javascript" src="/lib/jquery.min.js")
+		script(type="text/javascript" src="/lib/socket.io.js")
+		script(type="text/javascript" src="/lib/vue.min.js")
+		script(type="text/javascript" src="/scripts/chat_vue.js")
 		script(type="text/javascript" src="/scripts/chat.js")
