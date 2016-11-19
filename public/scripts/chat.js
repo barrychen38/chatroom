@@ -31,7 +31,7 @@ $(function() {
 		emoji_len = emoji_name.length;
 	
 	window.onbeforeunload = function() {
-		// return 1;
+		return 1;
 	}
 	
 	// check notification
