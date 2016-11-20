@@ -1,0 +1,385 @@
+/* common */
+input {
+	padding: 8px;
+	margin-top: 16px;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.clearfix:after {
+	content: '';
+	display: block;
+	clear: both;
+	width: 0;
+	height: 0;
+}
+
+.fl {
+	float: left;
+}
+
+.fr {
+	float: right;
+}
+
+.bc {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.ghost {
+	display: none;
+}
+
+::-webkit-scrollbar {
+	display: none;
+}
+
+[v-cloak] {
+	display: none;
+}
+
+/* login */
+.login, .register {
+	text-align: center;
+	margin-top: 36px;
+}
+.or {
+	margin: 0 16px;
+	color: #777;
+}
+.register_btn:hover,
+.login_btn:hover {
+	text-decoration: underline;
+}
+.errMsg {
+	color: red;
+	text-align: center;
+	margin-top: 16px;
+}
+
+/* register */
+.input_title {
+	display: inline-block;
+	width: 90px;
+	text-align: left;
+}
+input[type="radio"] {
+	position: relative;
+	top: 2px;
+	margin-left: 20px;
+}
+
+/* chat */
+.enter_nickname {
+	width: 100%;
+	height: 100%;
+	background: #fff;
+	overflow: hidden;
+	z-index: 9;
+	position: absolute;
+	top: 0;
+	left: 0;
+	/*display: none;*/
+}
+.enter_nickname form {
+	text-align: center;
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+.enter_nickname form p {
+	font-size: 24px;
+}
+.enter_nickname .nickname {
+	text-align: center;
+	border: 0;
+	border-bottom: 1px solid #000;
+	font-size: 20px;
+	color: #777;
+}
+.enter_nickname .confirm,
+.container .text .send {
+	border: 1px solid #81cc7a;
+	background: #81cc7a;
+	color: #fff;
+	border-radius: 4px;
+}
+.container {
+	width: 100%;
+	height: 100%;
+	background: #2a333c;
+	overflow: hidden;
+}
+.container .wrapper {
+	width: 544px;
+	height: auto;
+	background: #fff;
+	border-radius: 4px;
+}
+.container .whoiam {
+	width: 520px;
+	height: 32px;
+	line-height: 32px;
+	text-align: center;
+	padding: 12px;
+	/*background: #fff;*/
+	font-size: 16px;
+	border-bottom: 1px solid #ddd;
+	margin-top: 80px;
+	cursor: default;
+}
+.container .whoiam .p_text {
+	font-size: 14px;
+	color: #777;
+}
+.container .whoiam .info {
+	color: #ef6f67;
+}
+.container .messages {
+	width: 520px;
+	height: 380px;
+	padding: 12px;
+	cursor: default;
+	/*background: #fff;*/
+}
+.container .messages .inner {
+	width: 100%;
+	height: 100%;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+.container .messages .left,
+.container .messages .right {
+	width: 50%;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+.container .messages .left {
+	text-align: left;
+}
+.container .messages .right {
+	text-align: right;
+}
+.container .messages li {
+	display: inline-block;
+	max-width: 200px;
+	height: auto;
+	padding: 8px;
+	border-radius: 4px;
+	/*overflow: hidden;*/
+	position: relative;
+	margin-top: 24px;
+	text-align: left;
+	font-size: 14px;	
+	white-space: pre-wrap;
+	word-wrap: break-word;
+}
+.container .messages li img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+.container .messages .left li {
+	background: #D9F4FE;
+	margin-left: 8px;
+}
+.container .messages .right li {
+	background: #F3F3F3;
+	margin-right: 8px;
+}
+.container .messages li:after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+	display: block;
+	width: 0;
+	height: 0;
+	border: 8px solid transparent;
+}
+.container .messages .left li:after {
+	border-right-color: #D9F4FE;
+	left: -16px;
+}
+.container .messages .right li:after {
+	border-left-color: #F3F3F3;
+	right: -16px;
+}
+.container .messages li dt:last-child {
+	display: inline-block;
+	position: absolute;
+	top: -16px;
+	font-size: 11px;
+	color: #777;
+}
+.container .messages .left li dt:last-child {
+	left: 6px;
+}
+.container .messages .right li dt:last-child {
+	right: 6px;
+}
+.container .emoji {
+	width: 528px;
+	height: 24px;
+	padding: 8px 8px 0;
+	cursor: default;
+	border-top: 1px solid #ddd;
+	position: relative;
+}
+.container .emoji i {
+	margin-right: 12px;
+	cursor: pointer;
+}
+.container .emoji .all {
+	background-image: url(../img/all.png);
+}
+.container .emoji .shake {
+	background-image: url(../img/shake.png);
+}
+.container .emoji .image {
+	background-image: url(../img/image.png);
+	position: relative;
+}
+.container .emoji .image .file {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	z-index: 2;
+}
+.container .emoji .table {
+	width: 300px;
+	background: #fff;
+	position: absolute;
+	top: -200px;
+	left: 6px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 0 0 6px 6px;
+	-webkit-box-shadow: 410px 10px 28px 0 #ddd;
+	box-shadow: 10px 10px 28px 0 #ddd;
+	z-index: 3;
+}
+.container .emoji .table:before,
+.container .emoji .table:after {
+	content: '';
+	display: inline-block;
+	width: 0;
+	height: 0;
+	position: absolute;
+	left: 5px;
+	bottom: -17px;
+	border: 8px solid transparent;
+	border-top-color: #ddd;
+}
+.container .emoji .table:after {
+	bottom: -16px;
+	border-top-color: #fff;
+}
+.container .emoji .table i {
+	float: left;
+	margin: 6px 6px 0 0;
+}
+.container .text {
+	width: 544px;
+	height: auto;
+	position: relative;
+}
+.container .text .input {
+	resize: none;
+	border: 0;
+	width: 450px;
+	height: 80px;
+	padding: 12px 82px 12px 12px;
+	overflow: auto;
+	border-radius: 0 0 4px 4px;
+	letter-spacing: 0.5px;
+}
+.container .text .send {
+	margin: 0 0 0 16px;
+	padding: 4px 6px;
+	position: absolute;
+	right: 8px;
+	bottom: 8px;
+	z-index: 1;
+}
+.container .tip {
+	color: #fff;
+	font-size: 12px;
+	text-align: center;
+	padding: 12px 0;
+	letter-spacing: 0.5px;
+	cursor: default;
+}
+
+/* animate start */
+
+.animated {
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+@-webkit-keyframes shake {
+  0%, 100% {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  10%, 30%, 50%, 70%, 90% {
+    -webkit-transform: translate3d(-12px, 0, 0);
+    transform: translate3d(-12px, 0, 0);
+  }
+
+  20%, 40%, 60%, 80% {
+    -webkit-transform: translate3d(12px, 0, 0);
+    transform: translate3d(12px, 0, 0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  10%, 30%, 50%, 70%, 90% {
+    -webkit-transform: translate3d(-12px, 0, 0);
+    transform: translate3d(-12px, 0, 0);
+  }
+
+  20%, 40%, 60%, 80% {
+    -webkit-transform: translate3d(12px, 0, 0);
+    transform: translate3d(12px, 0, 0);
+  }
+}
+
+.shake {
+  -webkit-animation-name: shake;
+  animation-name: shake;
+}
+
+/* animate end */
+
+@media screen and (max-width: 640px) {
+	.enter_nickname,
+	.container {
+		display: none;
+	}
+}

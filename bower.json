@@ -10,7 +10,7 @@
     "nodejs",
     "chat"
   ],
-  "homepage": "https://github.com/Chen38/nodejs_test",
+  "homepage": "https://github.com/Chen38/nodejs_chat-room",
   "private": true,
   "ignore": [
     "**/.*",

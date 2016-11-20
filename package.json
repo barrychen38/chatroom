@@ -4,7 +4,7 @@
   "description": "A chat room based on nodejs",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "chat": "node server.js"
   },
   "keywords": [
     "nodejs",
@@ -22,6 +22,7 @@
     "mysql": "^2.11.1",
     "serve-favicon": "^2.3.0",
     "socket.io": "^1.5.1",
-    "uuid": "^2.0.3"
+    "uuid": "^2.0.3",
+    "vue": "^2.0.8"
   }
 }
