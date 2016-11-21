@@ -3,13 +3,13 @@ var express = require('express'),
 	http = require('http'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs'),
+	jade = require('jade'),
 	mysql = require('mysql'),
 	favicon = require('serve-favicon'),
 	uuid = require('uuid'),
 	fs = require('fs');
 // routes
-var login = require('./routes/login'),
-	register = require('./routes/register'),
+var phone_shake = require('./routes/phone_shake'),
 	chat = require('./routes/chat');
 // config
 var mysql_config = require('./config/config').config;
@@ -23,16 +23,15 @@ var app = express(),
 	server = http.createServer(app),
 	io = require('socket.io')(server);
 // engine
-app.engine('html', ejs.__express);
+// app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
-app.set('view engine', 'html');
+app.set('view engine', 'jade');
 // favicon
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // static files
 app.use(express.static(__dirname + '/public'));
 // use routes
-app.use('/login', login);
-app.use('/register', register);
+app.use('/phone_shake', phone_shake);
 app.use('/chat', chat);
 // parse request body
 app.use(bodyParser.json({limit: 1024*1024*5}));
@@ -119,7 +118,9 @@ app.post('/register', (req, res) => {
 	});
 });
 // chat
-var p_count = 0;
+var p_count = 0,
+	phone_count,
+	user_names = [];
 io.on('connection', (socket) => {
 	p_count++;
 	console.log('online people: ' + p_count);
@@ -129,20 +130,17 @@ io.on('connection', (socket) => {
 	socket.on('online', ()=> {
 		io.emit('online', p_count);
 	});
-	// socket.on('offline', people => {
-	// 	io.emit('offline', people);
-	// });
 	socket.on('shake', shake => {
 		io.emit('shake', shake);
 	});
 	socket.on('send_image', data => {
 		io.emit('send_image', data);
 	});
+	socket.on('pshake', data => {
+		io.emit('pshake', data);
+	});
 	socket.on('disconnect', () => {
 		p_count--;
-		if (p_count === 0) {
-			io.emit('save_chat');
-		}
 		console.log('online people: ' + p_count);
 		io.emit('offline', p_count);
 	});

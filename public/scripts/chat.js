@@ -1,5 +1,15 @@
 $(function() {
 	
+	if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Windows Phone)/i)) {
+		location.href = '/phone_shake' + location.hash;
+		return;
+	}
+	
+	// define emojis
+	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-scream', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum', 'em em-mask', 'em em-boy', 'em em-alien', 'em em-clap', 'em em-facepunch', 'em em-girl', 'em em-imp', 'em em-monkey_face', 'em em-octocat', 'em em-rage', 'em em-see_no_evil', 'em em-smiling_imp', 'em em-speak_no_evil', 'em em-thumbsup', 'em em-thumbsdown', 'em em-v', 'em em-trollface', 'em em-dog', 'em em-broken_heart'],
+		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
+		emoji_len = emoji_name.length;
+	
 	var $confirm = $('.confirm'),
 		$nickname = $('.nickname'),
 		$input = $('.input'),
@@ -22,13 +32,8 @@ $(function() {
 	
 	var socket = io();
 	
-	var u_time,
+	var uuid,
 		record_input_emoji_info = 'blank';
-	
-	// define emojis
-	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-scream', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum', 'em em-mask', 'em em-boy', 'em em-alien', 'em em-clap', 'em em-facepunch', 'em em-girl', 'em em-imp', 'em em-monkey_face', 'em em-octocat', 'em em-rage', 'em em-see_no_evil', 'em em-smiling_imp', 'em em-speak_no_evil', 'em em-thumbsup', 'em em-thumbsdown', 'em em-v', 'em em-trollface', 'em em-dog', 'em em-broken_heart'],
-		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
-		emoji_len = emoji_name.length;
 	
 	window.onbeforeunload = function() {
 		// return 1;
@@ -40,34 +45,11 @@ $(function() {
 			checkPermission = window.Notification.permission;
 	}
 	
-	/**
-	 * get chat history
-	 * @pos: 1 => left(others), 2 => right(myself)
-	 * @id: 0-9, only save 10 messages, up to bottom
-	 * @msg: message
-	 * @name: last time user's nickname
-	 */
-	
-	for (var i = 0; i < emoji_len; i++) {
-		var i_tag = $('<i></i>');
-		i_tag.addClass(emoji_name[i]);
-		i_tag.attr('title', emoji_input_name[i]);
-		$emoji_table.append(i_tag);
-	}
-	
-	var $emoji_choose = $emoji_table.children('i');
-	
-	$emoji_choose.on('click', function() {
-		$input.val($input.val() + '[' + emoji_input_name[$(this).index()] + ']');
-		record_input_emoji_info = $input.val();
-		$input.focus();
-	});
-	
+	// check nickname
 	$confirm.on('click', function(event) {
 		event.preventDefault();
 		checkNickName();
 	});
-	
 	$nickname.on('keydown', function(event) {
 		if (event.keyCode === 13) {
 			event.preventDefault();
@@ -75,6 +57,31 @@ $(function() {
 		}
 	});
 	
+	// append emojis
+	for (var i = 0; i < emoji_len; i++) {
+		var i_tag = $('<i></i>');
+		i_tag.addClass(emoji_name[i]);
+		i_tag.attr('title', emoji_input_name[i]);
+		$emoji_table.append(i_tag);
+	}
+	var $emoji_choose = $emoji_table.children('i');
+	$emoji_choose.on('click', function() {
+		$input.val($input.val() + '[' + emoji_input_name[$(this).index()] + ']');
+		record_input_emoji_info = $input.val();
+		$input.focus();
+	});
+	$emoji_all.on('click', function() {
+		$emoji_table.toggleClass('ghost');
+		return false;
+	});
+	$('body').on('click', function(event) {
+		if (!$emoji_table.hasClass('ghost') && event.target !== $emoji_all[0]) {
+			$emoji_table.addClass('ghost');
+		}
+		// return false;
+	});
+	
+	// send message
 	$input.on('keydown', function(event) {
 		if (event.keyCode === 13 && !event.ctrlKey) {
 			event.preventDefault();
@@ -84,18 +91,20 @@ $(function() {
 			$(this).val($input.val() + '\n');
 		}
 	});
-	
-	$('.send').on('click', function() {
-		sendMessage();
-	});
-	
-	var reader = new FileReader();
+	$('.send').on('click', sendMessage);
 	
 	// send image
+	var reader = new FileReader();
 	$send_image.on('change', function(event) {
 		var file = event.target.files[0];
+		if (!file.type.match(/(jpg|jpeg|png|gif)/g)) {
+			alert('PLEASE SEND A IMAGE.');
+			$send_image.val('');
+			return;
+		}
 		if (file.size > 1024*1024*5) {
 			alert('Please upload a photo less than 5MB.');
+			$send_image.val('');
 			return;
 		}
 		$(this).attr('disabled');
@@ -110,51 +119,35 @@ $(function() {
 	var showTimer;
 	$shake.on('click', function() {
 		socket.emit('shake', $('.whoiam .name').text());
-		clearTimeout(showTimer);
 		// return false;
 	});
 	socket.on('shake', function(shake) {
-		$wrapper.addClass('animated shake');
-		$info.show();
-		$info.text(shake + ' SHAKED');
-		showTimer = setTimeout(function() {
-			$info.fadeOut(400);
-		}, 900);
+		shake(shake);
 	});
 	$wrapper.on('webkitAnimationEnd animationend', function() {
 		$(this).removeClass('animated shake');
 	});
-	
-	// emoji
-	$emoji_all.on('click', function() {
-		$emoji_table.toggleClass('ghost');
-		return false;
-	});
-	
-	$('body').on('click', function(event) {
-		if (!$emoji_table.hasClass('ghost') && event.target !== $emoji_all[0]) {
-			$emoji_table.addClass('ghost');
-		}
-		// return false;
+	socket.on('pshake', function(data) {
+		var phone_shake_people = data.people,
+			phone_shake_uuid = data.uuid;
+		shake(phone_shake_people);
 	});
 	
 	// online
+	socket.emit('online');
 	socket.on('online', function(people) {
 		$people.text(people);
 	});
-	socket.emit('online');
+	
 	// offline
 	socket.on('offline', function(people) {
 		$people.text(people);
 	});
-	// save chat
-	// socket.on('save_chat', saveChat);
 	
+	// chat
 	socket.on('chat', function(data) {
-		var people = data.people.split('_'),
-			pos = null;
-		if ($('.nickname').val() === people[0] && u_time === +people[1]) { // is you
-			pos = 2;
+		var people = data.people.split('_');
+		if ($('.nickname').val() === people[0] && uuid === people[1]) { // is you
 			your_message = checkMesage(data.msg, data.riei, 'Me');
 			var right_height = $r_message.height();
 			$r_message.append(your_message);
@@ -170,10 +163,10 @@ $(function() {
 			if (checkPermission === 'granted') {
 				var notify = new Notification(people[0], {
 					body: data.msg,
-					icon: '/img/notify.png'
+					icon: '/img/notify.png',
+					eventTime: 800
 				});
 			}
-			pos = 1;
 			other_message = checkMesage(data.msg, data.riei, people[0]);
 			var left_height = $l_message.height();
 			$l_message.append(other_message);
@@ -186,18 +179,12 @@ $(function() {
 			}
 			$inner.scrollTop($l_message.height());
 		}
-		save_chat_history.push({
-			msg: data.msg,
-			pos: pos,
-			name: people
-		});
-		if (save_chat_history.length >= 10)
-			save_chat_history.length = 10;
 	});
 	
+	// send image
 	socket.on('send_image', function(data) {
 		var people = data.people.split('_');
-		if ($('.nickname').val() === people[0] && u_time === +people[1]) { // is you
+		if ($('.nickname').val() === people[0] && uuid === people[1]) { // is you
 			var right_height = $r_message.height();
 			preloadImage(data.img_url, function() {
 				$r_message.append('<li><img src="' + data.img_url + '"><dt>Me</dt></li>');
@@ -214,7 +201,8 @@ $(function() {
 			if (checkPermission === 'granted') {
 				var notify = new Notification(people[0], {
 					body: 'Send a photo in Group Chat.',
-					icon: '/img/notify.png'
+					icon: '/img/notify.png',
+					eventTime: 800
 				});
 			}
 			var left_height = $l_message.height();
@@ -232,6 +220,16 @@ $(function() {
 		}
 	});
 	
+	function shake(people) {
+		clearTimeout(showTimer);
+		$wrapper.addClass('animated shake');
+		$info.show();
+		$info.text(people + ' SHAKED');
+		showTimer = setTimeout(function() {
+			$info.fadeOut(400);
+		}, 900);
+	}
+	
 	function checkNickName() {
 		var nn = $('.nickname').val(),
 			len = nn.length,
@@ -245,22 +243,22 @@ $(function() {
 			return;
 		}
 		$('.whoiam .name').text(nn);
-		u_time = new Date().getTime();
+		uuid = UUID.generate();
 		your_nickname = nn;
 		// save now your name to recover msg
 		if (!localStorage.getItem('nickname')) {
-			localStorage.setItem('nickname', your_nickname + '_' + u_time);
+			localStorage.setItem('nickname', your_nickname + '_' + uuid);
 			your_old_name = your_nickname;
 		} else {
 			your_old_name = localStorage.getItem('nickname');
-			localStorage.setItem('nickname', your_nickname + '_' + u_time);
+			localStorage.setItem('nickname', your_nickname + '_' + uuid);
 		}
 		console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
 		$('.enter_nickname').hide();
 		if (!location.hash) {
-			location.href += '#nickname=' + your_nickname + '_' + u_time;
+			location.href += '#nickname=' + your_nickname + '_' + uuid;
 		} else {
-			location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + u_time;
+			location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
 		}
 	}
 	
@@ -271,7 +269,7 @@ $(function() {
 			socket.emit('chat', {
 				msg: $input.val(),
 				riei: record_input_emoji_info,
-				people: your_nickname + '_' + u_time
+				people: your_nickname + '_' + uuid
 			});
 			$input.val('');
 			return false;
@@ -290,7 +288,7 @@ $(function() {
 				msg = msg.replace(/<+/g, '&lt;');
 				msg = msg.replace(/>+/g, '&gt;');
 			}
-			for (var i = 0; i < len; i++) { // record emoji(s)
+			for (var i = 0; i < len; i++) { // check emoji(s)
 				if (msg.indexOf(emojis[i]) !== -1) {
 					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
 				}
@@ -316,7 +314,7 @@ $(function() {
 				if (result === 1) {
 					socket.emit('send_image', {
 						img_url: data.img_url,
-						people: your_nickname + '_' + u_time
+						people: your_nickname + '_' + uuid
 					});
 				}
 			}
