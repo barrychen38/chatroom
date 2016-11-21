@@ -36,7 +36,7 @@ $(function() {
 		record_input_emoji_info = 'blank';
 	
 	window.onbeforeunload = function() {
-		// return 1;
+		return 1;
 	}
 	
 	// check notification
