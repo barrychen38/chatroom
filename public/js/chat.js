@@ -36,7 +36,7 @@ $(function() {
 		record_input_emoji_info = 'blank';
 	
 	window.onbeforeunload = function() {
-		return 1;
+		// return 1;
 	}
 	
 	// check notification
@@ -48,12 +48,12 @@ $(function() {
 	// check nickname
 	$confirm.on('click', function(event) {
 		event.preventDefault();
-		checkNickName();
+		checkNickname();
 	});
 	$nickname.on('keydown', function(event) {
 		if (event.keyCode === 13) {
 			event.preventDefault();
-			checkNickName();
+			checkNickname();
 		}
 	});
 	
@@ -122,7 +122,7 @@ $(function() {
 		// return false;
 	});
 	socket.on('shake', function(shake) {
-		shake(shake);
+		shaking(shake);
 	});
 	$wrapper.on('webkitAnimationEnd animationend', function() {
 		$(this).removeClass('animated shake');
@@ -130,7 +130,7 @@ $(function() {
 	socket.on('pshake', function(data) {
 		var phone_shake_people = data.people,
 			phone_shake_uuid = data.uuid;
-		shake(phone_shake_people);
+		shaking(phone_shake_people);
 	});
 	
 	// online
@@ -220,7 +220,7 @@ $(function() {
 		}
 	});
 	
-	function shake(people) {
+	function shaking(people) {
 		clearTimeout(showTimer);
 		$wrapper.addClass('animated shake');
 		$info.show();
@@ -230,7 +230,7 @@ $(function() {
 		}, 900);
 	}
 	
-	function checkNickName() {
+	function checkNickname() {
 		var nn = $('.nickname').val(),
 			len = nn.length,
 			check = nn.match(/\s/g);

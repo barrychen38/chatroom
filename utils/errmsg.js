@@ -1,4 +1,4 @@
-var sendErrMsg = {
+module.exports = {
 	sql_connect_error: {
 		result: 0,
 		msg: 'MYSQL CONNECT ERROR'
@@ -12,5 +12,3 @@ var sendErrMsg = {
 		msg: 'UPDATE SQL ERROR.'
 	}
 }
-
-module.exports = sendErrMsg;
