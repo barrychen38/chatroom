@@ -8,17 +8,17 @@ html(lang="en")
 		link(rel="stylesheet", href="/css/normalize.css")
 		link(rel="stylesheet", href="/css/emoji.css")
 		link(rel="stylesheet", href="/css/common.css")
-	body
+	body#app
 		.enter_nickname
 			form
 				p PLEASE ENTER YOUR NAME
-				input.nickname(type="text", name="nickname", maxlength="20", autofocus)
+				input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname")
 				br
 				input.confirm(type="button", name="confirm", value="CONFIRM")
 		.container
 			.wrapper.bc
 				.whoiam.bc
-					span.name.fl Guest
+					span.name.fl {{nickname}}
 					span.info
 					b.p_count.p_text.fr 0
 					span.p_text.fr Online:&nbsp;&nbsp;
@@ -37,6 +37,7 @@ html(lang="en")
 					input.send(type="button", name="send", value='SEND')
 			p.tip Enter to send, Ctrl + Enter to wrap.
 		script(type="text/javascript" src="/vendor/jquery.min.js")
+		script(type="text/javascript" src="/vendor/vue.min.js")
 		script(type="text/javascript" src="/vendor/socket.io.js")
 		script(type="text/javascript" src="/vendor/uuid.core.js")
 		script(type="text/javascript" src="/js/chat.js")

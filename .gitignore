@@ -1,5 +1,5 @@
-.sass-cache/
-node_modules/
-bower_components/
-public/upload/*
-npm-debug.log
+/.sass-cache
+/node_modules
+/bower_components
+upload/
+npm-debug.*

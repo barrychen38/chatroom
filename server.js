@@ -23,9 +23,9 @@ var app = express(),
 	server = http.createServer(app),
 	io = require('socket.io')(server);
 // engine
-// app.engine('html', ejs.__express);
+app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
+app.set('view engine', 'html');
 // favicon
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // static files
