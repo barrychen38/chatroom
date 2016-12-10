@@ -5,6 +5,10 @@ html, body {
 	overflow: hidden;
 }
 
+[v-cloak] {
+	display: none;
+}
+
 .clearfix:after {
 	content: '';
 	display: block;
@@ -39,12 +43,21 @@ input {
 	margin-top: 16px;
 }
 
+#app {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #2a333c;
+	z-index: 6;
+}
+
 /* chat */
 .enter_nickname {
 	width: 100%;
 	height: 100%;
 	background: #fff;
-	overflow: hidden;
 	z-index: 9;
 	position: absolute;
 	top: 0;
@@ -76,10 +89,8 @@ input {
 	}
 }
 .container {
-	width: 100%;
-	height: 100%;
-	background: #2a333c;
-	overflow: hidden;
+	// width: 100%;
+	// height: 100%;
 	.wrapper {
 		width: 544px;
 		height: auto;

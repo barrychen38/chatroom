@@ -12,10 +12,12 @@ $(function() {
 	
 	/* Vue.js test start */
 	
-	var chat = new Vue({
+	var App = new Vue({
 		el: '#app',
 		data: {
-			nickname: 'Guest'
+			nickname: 'Barry',
+			others: [],
+			yours: [],
 		}
 	});
 	
@@ -253,7 +255,7 @@ $(function() {
 			alert('NICKNAME CANNOT BE ALL SPACES!');
 			return;
 		}
-		$('.whoiam .name').text(nn);
+		// $('.whoiam .name').text(nn);
 		uuid = UUID.generate();
 		your_nickname = nn;
 		// save now your name to recover msg
