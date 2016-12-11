@@ -8,36 +8,39 @@ html(lang="en")
 		link(rel="stylesheet", href="/css/main.css")
 	body
 		#app(v-cloak)
-			.enter_nickname.ghost
+			.enter_nickname
 				form
 					p PLEASE ENTER YOUR NAME
-					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname")
+					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname", @keydown.13.prevent="confirm")
 					br
-					input.confirm(type="button", name="confirm", value="CONFIRM")
+					input.confirm(type="button", name="confirm", value="CONFIRM", @click.prevent="confirm")
 			.container
 				.wrapper.bc
 					.whoiam.bc
 						span.name.fl {{nickname}}
-						span.info
-						b.p_count.p_text.fr 0
+						span.info {{info}}
+						b.p_count.p_text.fr {{p_count}}
 						span.p_text.fr Online:&nbsp;&nbsp;
 					.messages.bc
 						.inner.clearfix
-							ul.left.fl
-								li(v-for="item in others") {{item}}
-									dt {{someone}}
-							ul.right.fr
-								li(v-for="item in yours") {{item}}
-									dt Me
+							.left.fl
+								.msg(v-for="item in others")
+									span {{item.msg}}
+										dt {{item.name}}
+							.right.fr
+								.msg(v-for="item in yours") 
+									span
+										dt Me
 					.emoji
 						i.em.all
 						i.em.shake
 						i.em.image
 							input.file(type="file", name="file", accept="images/*")
 						.table.clearfix.ghost
+							i(v-for="ct in cts" class="{{ct.className}}" title="{{ct.title}}")
 					.text.bc
-						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus)
-						input.send(type="button", name="send", value='SEND')
+						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, @keydown.13.prevent="send")
+						input.send(type="button", name="send", value='SEND', @click="send('hello', $event)")
 				p.tip Enter to send, Ctrl + Enter to wrap.
 		script(type="text/javascript" src="/dist/js/lib.min.js")
 		script(type="text/javascript" src="/js/chat.js")

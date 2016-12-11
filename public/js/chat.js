@@ -18,8 +18,26 @@ $(function() {
 			nickname: 'Barry',
 			others: [],
 			yours: [],
+			cts: [],
+			info: '',
+			p_count: 0
+		},
+		methods: {
+			confirm: function() {
+				checkNickname();
+			},
+			send: function() {
+				sendMessage();
+			}
 		}
 	});
+	
+	for (var i = 0; i < emoji_len; i++) {
+		App.$data.cts.push({
+			className: emoji_name[i],
+			title: emoji_input_name[i]
+		});
+	}
 	
 	/* Vue.js test end */
 	
@@ -58,25 +76,13 @@ $(function() {
 			checkPermission = window.Notification.permission;
 	}
 	
-	// check nickname
-	$confirm.on('click', function(event) {
-		event.preventDefault();
-		checkNickname();
-	});
-	$nickname.on('keydown', function(event) {
-		if (event.keyCode === 13) {
-			event.preventDefault();
-			checkNickname();
-		}
-	});
-	
 	// append emojis
-	for (var i = 0; i < emoji_len; i++) {
-		var i_tag = $('<i></i>');
-		i_tag.addClass(emoji_name[i]);
-		i_tag.attr('title', emoji_input_name[i]);
-		$emoji_table.append(i_tag);
-	}
+	// for (var j = 0; j < emoji_len; j++) {
+	// 	var i_tag = $('<i></i>');
+	// 	i_tag.addClass(emoji_name[j]);
+	// 	i_tag.attr('title', emoji_input_name[j]);
+	// 	$emoji_table.append(i_tag);
+	// }
 	var $emoji_choose = $emoji_table.children('i');
 	$emoji_choose.on('click', function() {
 		$input.val($input.val() + '[' + emoji_input_name[$(this).index()] + ']');
@@ -104,7 +110,6 @@ $(function() {
 			$(this).val($input.val() + '\n');
 		}
 	});
-	$('.send').on('click', sendMessage);
 	
 	// send image
 	var reader = new FileReader();
@@ -243,6 +248,7 @@ $(function() {
 		}, 900);
 	}
 	
+	// step 1 success
 	function checkNickname() {
 		var nn = $('.nickname').val(),
 			len = nn.length,
@@ -292,7 +298,7 @@ $(function() {
 	function checkMesage(msg, riei, nn) {
 		record_input_emoji_info = riei;
 		console.info('record_input_emoji_info: ' + record_input_emoji_info);
-		var li = $('<li></li><br>'),
+		var li = $('<li></li>'),
 			emojis = record_input_emoji_info.match(/\[[a-z_]+\]/g),
 			len = 0;
 		if (emojis !== null) { // have emoji(s)

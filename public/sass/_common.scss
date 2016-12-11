@@ -134,8 +134,9 @@ input {
 			margin: 0;
 			padding: 0;
 			position: relative;
+			white-space: pre-wrap;
 		}
-		li {
+		span {
 			display: inline-block;
 			max-width: 200px;
 			height: auto;
@@ -174,7 +175,7 @@ input {
 		}
 		.left {
 			text-align: left;
-			li {
+			span {
 				background: #D9F4FE;
 				margin-left: 8px;
 				&:after {
@@ -188,7 +189,7 @@ input {
 		}
 		.right {
 			text-align: right;
-			li {
+			span {
 				background: #F3F3F3;
 				margin-right: 8px;
 				&:after {
