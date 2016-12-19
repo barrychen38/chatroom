@@ -17,7 +17,7 @@ var mysql_config = require('./config/config').config;
 var errMsg = require('./utils/errmsg'),
 	sqlQuery = require('./utils/query');
 // port
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 2261;
 // server
 var app = express(),
 	server = http.createServer(app),
@@ -155,11 +155,11 @@ app.post('/upload_image', (req, res) => {
 	
 	fs.writeFile('public/upload/' + file_name, new Buffer(file, 'base64'), err => {
 		if (err) {
-			res.send(JSON.stringify({readState: 0, msg: 'Upload failed.'}));
+			res.send(JSON.stringify({readyState: 0, msg: 'Upload failed.'}));
 			return;
 		}
 	});
-	res.send(JSON.stringify({readState: 1, img_url: '/upload/' + file_name}));
+	res.send(JSON.stringify({readyState: 1, img_url: '/upload/' + file_name}));
 });
 // get chat history
 app.get('/get_chat_history', (req, res) => {

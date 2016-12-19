@@ -1,4 +1,4 @@
-$(function() {
+!function(root) {
 	
 	if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Windows Phone)/i)) {
 		location.href = '/phone_shake' + location.hash;
@@ -10,61 +10,240 @@ $(function() {
 		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
 		emoji_len = emoji_name.length;
 	
+	var showTimer,
+		socket = io(),
+		uuid,
+		your_nickname,
+		your_old_name;
+	
+	var reader = new FileReader();
+	
 	/* Vue.js test start */
+	
+	Vue.component('msg-list', {
+		template: '#msg-template',
+		props: {
+			messages: Array
+		}
+	});
 	
 	var App = new Vue({
 		el: '#app',
+		// components: 
 		data: {
-			nickname: 'Barry',
-			others: [],
-			yours: [],
+			isNicknameShow: false,
+			isEmojisShow: false,
+			isInfoShow: false,
+			nickname: 'Test',
+			animateObject: {
+				animated: false,
+				shake: false
+			},
 			cts: [],
+			people: 0,
 			info: '',
-			p_count: 0
+			message: '',
+			others: [
+				{
+					msg: 'Hello',
+					name: 'Jeff'
+				}
+			],
+			yours: [
+				{
+					msg: 'World',
+					name: 'Barry'
+				}
+			],
 		},
 		methods: {
-			confirm: function() {
-				checkNickname();
+			confirmNickname: function() {
+				your_nickname = this.nickname;
+				var len = your_nickname.length,
+					check = your_nickname.match(/\s/g);
+				if (!len) {
+					alert('PLEASE ENTER YOUR NICKNAME!');
+					return;
+				}
+				if (check && check.length === len) {
+					alert('NICKNAME CANNOT BE ALL SPACES!');
+					return;
+				}
+				this.isNicknameShow = false;
+				uuid = UUID.generate();
+				// save now your name to recover msg
+				if (!localStorage.getItem('nickname')) {
+					localStorage.setItem('nickname', your_nickname + '_' + uuid);
+					your_old_name = your_nickname;
+				} else {
+					your_old_name = localStorage.getItem('nickname');
+					localStorage.setItem('nickname', your_nickname + '_' + uuid);
+				}
+				console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
+				$('.enter_nickname').hide();
+				if (!location.hash) {
+					location.href += '#nickname=' + your_nickname + '_' + uuid;
+				} else {
+					location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
+				}
 			},
-			send: function() {
-				sendMessage();
+			showEmojisTable: function(event) {
+				if (!this.isEmojisShow && event.target.className !== 'em all') {
+					// this.isEmojisShow = false;
+					return false;
+				}
+				this.isEmojisShow = !this.isEmojisShow;
+			},
+			chooseEmoji: function(index) {
+				this.message += '[' + emoji_input_name[index] + ']';
+				document.querySelector('.input').focus();
+			},
+			shakeWindow: function() {
+				var _this = this,
+					_wrapper = document.querySelector('.wrapper');
+				socket.emit('shake', this.nickname);
+				socket.on('shake', function(people) {
+					clearTimeout(showTimer);
+					_this.animateObject.animated = true;
+					_this.animateObject.shake = true;
+					_this.isInfoShow = true;
+					_this.info = people + ' SHAKED';
+					showTimer = setTimeout(function() {
+						_this.isInfoShow = false;
+					}, 900);
+				});
+				_wrapper.addEventListener('animationend', function() {
+					_this.animateObject.animated = false;
+					_this.animateObject.shake = false;
+				}, false);
+			},
+			sendImage: function(event) {
+				var _this = this,
+					_file,
+					_target = event.target
+				_target.onchange = function() {
+					_file = this.files[0];
+					val = this.value;
+					if (!_file.type.match(/(jpg|jpeg|png|gif)/g)) {
+						alert('PLEASE SEND A IMAGE.');
+						val = '';
+						return;
+					}
+					if (_file.size > 1024*1024*5) {
+						alert('Please upload a photo less than 5MB.');
+						val = '';
+						return;
+					}
+					_target.setAttribute('disabled', 'disabled');
+					reader.readAsDataURL(_file);
+					reader.onload = function() {
+						axios.post('/upload_image', {
+							file: this.result
+						}).then(function(response) {
+							if (response.data.readyState === 1) {
+								_target.removeAttribute('disabled');
+								val = '';
+								socket.emit('send_image', {
+									img_url: response.data.img_url,
+									people: your_nickname + '_' + uuid
+								});
+							}
+						});
+					}
+				}
+			},
+			sendMessage: function() {
+				var msg = this.message;
+				if (msg === '') {
+					alert('CANNOT SEND BLANK MESSAGE!');
+					return;
+				}
+				socket.emit('chat', {
+					msg: msg,
+					riei: record_input_emoji_info,
+					people: your_nickname + '_' + uuid
+				});
+				msg = '';
+			},
+			preloadImage: function(fn) {
+				var image = new Image();
+				image.src = src;
+				image.onload = function() {
+					fn && fn();
+				}
 			}
 		}
 	});
 	
 	for (var i = 0; i < emoji_len; i++) {
-		App.$data.cts.push({
+		App.cts.push({
 			className: emoji_name[i],
 			title: emoji_input_name[i]
 		});
 	}
 	
+	// online
+	socket.emit('online');
+	socket.on('online', function(people) {
+		App.people = people;
+	});
+	
+	// send image
+	socket.on('send_image', function(data) {
+		var people = data.people.split('_');
+		if (App.nickname === people[0] && uuid === people[1]) { // is you
+			var right_height = $r_message.height();
+			App.preloadImage(data.img_url, function() {
+				App.yours.push({
+					
+				});
+				$r_message.append('<li><img src="' + data.img_url + '"><dt>Me</dt></li>');
+				var right_len = $r_message.children('li').length;
+				if ($l_message.height() > right_height) {
+					$r_message.children('li').eq(right_len - 1).css({
+						'margin-top': $l_message.height() - right_height + 24
+					});
+				}
+				$inner.scrollTop($r_message.height());
+				$send_image.removeAttr('disabled');
+			});
+		} else {
+			if (checkPermission === 'granted') {
+				var notify = new Notification(people[0], {
+					body: 'Send a photo in Group Chat.',
+					icon: '/img/notify.png',
+					eventTime: 800
+				});
+			}
+			var left_height = $l_message.height();
+			App.preloadImage(data.img_url, function() {
+				$l_message.append('<li><img src="' + data.img_url + '"><dt>' + people[0] + '</dt></li>');
+				var left_len = $l_message.children('li').length;
+				if ($r_message.height() > left_height) {
+					$l_message.children('li').eq(left_len - 1).css({
+						'margin-top': $r_message.height() - left_height + 24
+					});
+				}
+				$inner.scrollTop($l_message.height());
+			});
+		}
+	});
+	
 	/* Vue.js test end */
 	
-	var $confirm = $('.confirm'),
-		$nickname = $('.nickname'),
-		$input = $('.input'),
-		$inner = $('.messages .inner'),
+	var $inner = $('.messages .inner'),
 		$l_message = $('.messages .left'),
 		$r_message = $('.messages .right'),
-		$people = $('.whoiam .p_count'),
-		$shake = $('.emoji .shake'),
-		$send_image = $('.emoji .file'),
 		$emoji_all = $('.emoji .all'),
 		$emoji_table = $('.emoji .table'),
 		$wrapper = $('.wrapper'),
 		$info = $('.info');
 	
-	var your_nickname,
-		your_message,
+	var your_message,
 		other_message,
-		your_old_name,
 		save_chat_history = [];
 	
-	var socket = io();
-	
-	var uuid,
-		record_input_emoji_info = 'blank';
+	var record_input_emoji_info = 'blank';
 	
 	window.onbeforeunload = function() {
 		// return 1;
@@ -76,86 +255,25 @@ $(function() {
 			checkPermission = window.Notification.permission;
 	}
 	
-	// append emojis
-	// for (var j = 0; j < emoji_len; j++) {
-	// 	var i_tag = $('<i></i>');
-	// 	i_tag.addClass(emoji_name[j]);
-	// 	i_tag.attr('title', emoji_input_name[j]);
-	// 	$emoji_table.append(i_tag);
-	// }
-	var $emoji_choose = $emoji_table.children('i');
-	$emoji_choose.on('click', function() {
-		$input.val($input.val() + '[' + emoji_input_name[$(this).index()] + ']');
-		record_input_emoji_info = $input.val();
-		$input.focus();
-	});
-	$emoji_all.on('click', function() {
-		$emoji_table.toggleClass('ghost');
-		return false;
-	});
-	$('body').on('click', function(event) {
-		if (!$emoji_table.hasClass('ghost') && event.target !== $emoji_all[0]) {
-			$emoji_table.addClass('ghost');
-		}
-		// return false;
-	});
-	
 	// send message
-	$input.on('keydown', function(event) {
-		if (event.keyCode === 13 && !event.ctrlKey) {
-			event.preventDefault();
-			sendMessage();
-		}
-		if (event.keyCode === 13 && event.ctrlKey) {
-			$(this).val($input.val() + '\n');
-		}
-	});
-	
-	// send image
-	var reader = new FileReader();
-	$send_image.on('change', function(event) {
-		var file = event.target.files[0];
-		if (!file.type.match(/(jpg|jpeg|png|gif)/g)) {
-			alert('PLEASE SEND A IMAGE.');
-			$send_image.val('');
-			return;
-		}
-		if (file.size > 1024*1024*5) {
-			alert('Please upload a photo less than 5MB.');
-			$send_image.val('');
-			return;
-		}
-		$(this).attr('disabled');
-		reader.readAsDataURL(file);
-		reader.onload = function() {
-			sendImage(this.result);
-			$send_image.val('');
-		}
-	});
+	// $input.on('keydown', function(event) {
+	// 	if (event.keyCode === 13 && !event.ctrlKey) {
+	// 		event.preventDefault();
+	// 		sendMessage();
+	// 	}
+	// 	if (event.keyCode === 13 && event.ctrlKey) {
+	// 		$(this).val($input.val() + '\n');
+	// 	}
+	// });
 	
 	// shake
-	var showTimer;
-	$shake.on('click', function() {
-		socket.emit('shake', $('.whoiam .name').text());
-		// return false;
-	});
-	socket.on('shake', function(shake) {
-		shaking(shake);
-	});
-	$wrapper.on('webkitAnimationEnd animationend', function() {
-		$(this).removeClass('animated shake');
-	});
-	socket.on('pshake', function(data) {
-		var phone_shake_people = data.people,
-			phone_shake_uuid = data.uuid;
-		shaking(phone_shake_people);
-	});
+	// socket.on('pshake', function(data) {
+	// 	var phone_shake_people = data.people,
+	// 		phone_shake_uuid = data.uuid;
+	// 	shaking(phone_shake_people);
+	// });
 	
 	// online
-	socket.emit('online');
-	socket.on('online', function(people) {
-		$people.text(people);
-	});
 	
 	// offline
 	socket.on('offline', function(people) {
@@ -200,99 +318,9 @@ $(function() {
 	});
 	
 	// send image
-	socket.on('send_image', function(data) {
-		var people = data.people.split('_');
-		if ($('.nickname').val() === people[0] && uuid === people[1]) { // is you
-			var right_height = $r_message.height();
-			preloadImage(data.img_url, function() {
-				$r_message.append('<li><img src="' + data.img_url + '"><dt>Me</dt></li>');
-				var right_len = $r_message.children('li').length;
-				if ($l_message.height() > right_height) {
-					$r_message.children('li').eq(right_len - 1).css({
-						'margin-top': $l_message.height() - right_height + 24
-					});
-				}
-				$inner.scrollTop($r_message.height());
-				$send_image.removeAttr('disabled');
-			});
-		} else {
-			if (checkPermission === 'granted') {
-				var notify = new Notification(people[0], {
-					body: 'Send a photo in Group Chat.',
-					icon: '/img/notify.png',
-					eventTime: 800
-				});
-			}
-			var left_height = $l_message.height();
-			preloadImage(data.img_url, function() {
-				$l_message.append('<li><img src="' + data.img_url + '"><dt>' + people[0] + '</dt></li>');
-				var left_len = $l_message.children('li').length;
-				if ($r_message.height() > left_height) {
-					$l_message.children('li').eq(left_len - 1).css({
-						'margin-top': $r_message.height() - left_height + 24
-					});
-				}
-				$inner.scrollTop($l_message.height());
-				$send_image.removeAttr('disabled');
-			});
-		}
-	});
-	
-	function shaking(people) {
-		clearTimeout(showTimer);
-		$wrapper.addClass('animated shake');
-		$info.show();
-		$info.text(people + ' SHAKED');
-		showTimer = setTimeout(function() {
-			$info.fadeOut(400);
-		}, 900);
-	}
-	
-	// step 1 success
-	function checkNickname() {
-		var nn = $('.nickname').val(),
-			len = nn.length,
-			check = nn.match(/\s/g);
-		if (!len) {
-			alert('PLEASE ENTER YOUR NICKNAME!');
-			return;
-		}
-		if (check && check.length === len) {
-			alert('NICKNAME CANNOT BE ALL SPACES!');
-			return;
-		}
-		// $('.whoiam .name').text(nn);
-		uuid = UUID.generate();
-		your_nickname = nn;
-		// save now your name to recover msg
-		if (!localStorage.getItem('nickname')) {
-			localStorage.setItem('nickname', your_nickname + '_' + uuid);
-			your_old_name = your_nickname;
-		} else {
-			your_old_name = localStorage.getItem('nickname');
-			localStorage.setItem('nickname', your_nickname + '_' + uuid);
-		}
-		console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
-		$('.enter_nickname').hide();
-		if (!location.hash) {
-			location.href += '#nickname=' + your_nickname + '_' + uuid;
-		} else {
-			location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
-		}
-	}
 	
 	function sendMessage() {
-		if ($input.val() === '') {
-			alert('CANNOT SEND BLANK MESSAGE!');
-		} else {
-			socket.emit('chat', {
-				msg: $input.val(),
-				riei: record_input_emoji_info,
-				people: your_nickname + '_' + uuid
-			});
-			$input.val('');
-			return false;
-		}
+		
 	}
 	
 	function checkMesage(msg, riei, nn) {
@@ -321,23 +349,7 @@ $(function() {
 	}
 	
 	function sendImage(file) {
-		$.ajax({
-			url: '/upload_image',
-			type: 'POST',
-			dataType: 'json',
-			data: {
-				file: file
-			},
-			success: function(data) {
-				var result = data.readState;
-				if (result === 1) {
-					socket.emit('send_image', {
-						img_url: data.img_url,
-						people: your_nickname + '_' + uuid
-					});
-				}
-			}
-		});
+		
 	}
 	
 	function preloadImage(src, fn) {
@@ -348,4 +360,4 @@ $(function() {
 		}
 	}
 	
-});
+}(this);

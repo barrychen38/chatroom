@@ -7,40 +7,43 @@ html(lang="en")
 		link(rel="icon", href="/faviocn.ico")
 		link(rel="stylesheet", href="/css/main.css")
 	body
-		#app(v-cloak)
-			.enter_nickname
-				form
+		
+		script#msg-template(type="text/x-template")
+			.msg(v-for="item in messages")
+				span {{item.msg}}
+					dt {{item.name}}
+		
+		#app(v-cloak, @click="showEmojisTable")
+			.enter_nickname(v-show="isNicknameShow")
+				.form
 					p PLEASE ENTER YOUR NAME
-					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname", @keydown.13.prevent="confirm")
+					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname", @keyup.13.prevent="confirmNickname")
 					br
-					input.confirm(type="button", name="confirm", value="CONFIRM", @click.prevent="confirm")
+					input.confirm(type="button", name="confirm", value="CONFIRM", @click.prevent="confirmNickname")
 			.container
-				.wrapper.bc
+				.wrapper.bc(:class="animateObject")
 					.whoiam.bc
 						span.name.fl {{nickname}}
-						span.info {{info}}
-						b.p_count.p_text.fr {{p_count}}
+						span.info(v-show="isInfoShow") {{info}}
+						b.p_count.p_text.fr {{people}}
 						span.p_text.fr Online:&nbsp;&nbsp;
 					.messages.bc
 						.inner.clearfix
 							.left.fl
-								.msg(v-for="item in others")
-									span {{item.msg}}
-										dt {{item.name}}
+								msg-list(:messages="others")
 							.right.fr
-								.msg(v-for="item in yours") 
-									span
-										dt Me
+								msg-list(:messages="yours")
 					.emoji
-						i.em.all
-						i.em.shake
+						i.em.all(@click.stop="showEmojisTable")
+						i.em.shake_btn(@click.prevent="shakeWindow")
 						i.em.image
-							input.file(type="file", name="file", accept="images/*")
-						.table.clearfix.ghost
-							i(v-for="ct in cts" class="{{ct.className}}" title="{{ct.title}}")
+							input.file(type="file", name="file", accept="images/*", @click="sendImage")
+						.table.clearfix(v-show="isEmojisShow")
+							i(v-for="(ct, index) in cts", :class="ct.className", :title="ct.title", @click.prevent="chooseEmoji(index)")
 					.text.bc
-						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, @keydown.13.prevent="send")
-						input.send(type="button", name="send", value='SEND', @click="send('hello', $event)")
+						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, v-model="message", @keyup.13.prevent="sendMessage")
+						input.send(type="button", name="send", value='SEND', @click.prevent="sendMessage")
 				p.tip Enter to send, Ctrl + Enter to wrap.
 		script(type="text/javascript" src="/dist/js/lib.min.js")
+		script(type="text/javascript" src="/vendor/jquery.min.js")
 		script(type="text/javascript" src="/js/chat.js")
