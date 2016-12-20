@@ -5,6 +5,8 @@
 		return;
 	}
 	
+	/* -------------------- Vue.js test start -------------------- */
+	
 	// define emojis
 	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-scream', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum', 'em em-mask', 'em em-boy', 'em em-alien', 'em em-clap', 'em em-facepunch', 'em em-girl', 'em em-imp', 'em em-monkey_face', 'em em-octocat', 'em em-rage', 'em em-see_no_evil', 'em em-smiling_imp', 'em em-speak_no_evil', 'em em-thumbsup', 'em em-thumbsdown', 'em em-v', 'em em-trollface', 'em em-dog', 'em em-broken_heart'],
 		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
@@ -14,22 +16,19 @@
 		socket = io(),
 		uuid,
 		your_nickname,
-		your_old_name;
+		your_old_name,
+		record_input_emoji_info = 'blank';
 	
 	var reader = new FileReader();
 	
-	/* Vue.js test start */
-	
 	Vue.component('msg-list', {
 		template: '#msg-template',
-		props: {
-			messages: Array
-		}
+		props: ['contents']
 	});
 	
 	var App = new Vue({
 		el: '#app',
-		// components: 
+		// components:
 		data: {
 			isNicknameShow: false,
 			isEmojisShow: false,
@@ -43,18 +42,8 @@
 			people: 0,
 			info: '',
 			message: '',
-			others: [
-				{
-					msg: 'Hello',
-					name: 'Jeff'
-				}
-			],
-			yours: [
-				{
-					msg: 'World',
-					name: 'Barry'
-				}
-			],
+			others: [],
+			yours: [],
 		},
 		methods: {
 			confirmNickname: function() {
@@ -96,6 +85,7 @@
 			},
 			chooseEmoji: function(index) {
 				this.message += '[' + emoji_input_name[index] + ']';
+				record_input_emoji_info = this.messages;
 				document.querySelector('.input').focus();
 			},
 			shakeWindow: function() {
@@ -116,6 +106,49 @@
 					_this.animateObject.animated = false;
 					_this.animateObject.shake = false;
 				}, false);
+			},
+			checkMesage: function(riei) {
+				record_input_emoji_info = riei;
+				console.info('record_input_emoji_info: ' + record_input_emoji_info);
+				var emojis = record_input_emoji_info.match(/\[[a-z_]+\]/g),
+					len = 0;
+				if (emojis !== null) { // have emoji(s)
+					len = emojis.length;
+					if (msg.indexOf('<') !== -1 || msg.indexOf('>') !== -1) {
+						msg = msg.replace(/<+/g, '&lt;');
+						msg = msg.replace(/>+/g, '&gt;');
+					}
+					for (var i = 0; i < len; i++) { // check emoji(s)
+						if (msg.indexOf(emojis[i]) !== -1) {
+							msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
+						}
+					}
+					li.eq(0).append(msg);
+				} else { // no emoji(s)
+					li.eq(0).text(msg);
+				}
+				li.eq(0).append('<dt>' + nn + '</dt>');
+				return li;
+			},
+			sendMessage: function() {
+				var msg = this.message;
+				if (msg === '') {
+					alert('CANNOT SEND BLANK MESSAGE!');
+					return;
+				}
+				socket.emit('chat', {
+					msg: msg,
+					riei: record_input_emoji_info,
+					people: your_nickname + '_' + uuid
+				});
+				msg = '';
+			},
+			preloadImage: function(fn) {
+				var image = new Image();
+				image.src = src;
+				image.onload = function() {
+					fn && fn();
+				}
 			},
 			sendImage: function(event) {
 				var _this = this,
@@ -150,26 +183,6 @@
 							}
 						});
 					}
-				}
-			},
-			sendMessage: function() {
-				var msg = this.message;
-				if (msg === '') {
-					alert('CANNOT SEND BLANK MESSAGE!');
-					return;
-				}
-				socket.emit('chat', {
-					msg: msg,
-					riei: record_input_emoji_info,
-					people: your_nickname + '_' + uuid
-				});
-				msg = '';
-			},
-			preloadImage: function(fn) {
-				var image = new Image();
-				image.src = src;
-				image.onload = function() {
-					fn && fn();
 				}
 			}
 		}
@@ -229,7 +242,7 @@
 		}
 	});
 	
-	/* Vue.js test end */
+	/* -------------------- Vue.js test end -------------------- */
 	
 	var $inner = $('.messages .inner'),
 		$l_message = $('.messages .left'),

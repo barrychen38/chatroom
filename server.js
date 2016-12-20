@@ -123,7 +123,7 @@ var p_count = 0,
 	user_names = [];
 io.on('connection', (socket) => {
 	p_count++;
-	console.log('online people: ' + p_count);
+	// console.log('online people: ' + p_count);
 	socket.on('chat', (data) => {
 		io.emit('chat', data);
 	});
@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
 	});
 	socket.on('disconnect', () => {
 		p_count--;
-		console.log('online people: ' + p_count);
+		// console.log('online people: ' + p_count);
 		io.emit('offline', p_count);
 	});
 });
