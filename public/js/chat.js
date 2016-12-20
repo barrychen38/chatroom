@@ -1,8 +1,20 @@
 !function(root) {
 	
+	// navigator to phone page
 	if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Windows Phone)/i)) {
 		location.href = '/phone_shake' + location.hash;
 		return;
+	}
+	
+	// ask sure to leave
+	window.onbeforeunload = function() {
+		// return 1;
+	}
+	
+	// check notification
+	if ('Notification' in window) {
+		var permission = window.Notification.requestPermission(),
+			checkPermission = window.Notification.permission;
 	}
 	
 	/* -------------------- Vue.js test start -------------------- */
@@ -21,19 +33,21 @@
 	
 	var reader = new FileReader();
 	
-	Vue.component('msg-list', {
-		template: '#msg-template',
-		props: ['contents']
-	});
+	// Vue.component('msg-list', {
+	// 	template: '#msg-template',
+	// 	props: ['contents']
+	// });
 	
 	var App = new Vue({
 		el: '#app',
 		// components:
 		data: {
 			isNicknameShow: false,
+			isWarnShow: true,
+			nickname: 'Barry',
+			confirmResult: '',
 			isEmojisShow: false,
 			isInfoShow: false,
-			nickname: 'Test',
 			animateObject: {
 				animated: false,
 				shake: false
@@ -41,51 +55,63 @@
 			cts: [],
 			people: 0,
 			info: '',
-			message: '',
+			typeMessage: '',
+			transformMessage: '',
 			others: [],
 			yours: [],
 		},
+		watch: {
+			nickname: function() {
+				this.checkNickname();
+			},
+			typeMessage: function() {
+				this.checkMessage();
+			}
+		},
 		methods: {
+			checkNickname: function() {
+				var _len = this.nickname.length,
+					_check = this.nickname.match(/\s/g);
+				if (!_len) {
+					this.confirmResult = 'Please enter a nickname';
+					return false;
+				}
+				if (_check && _check.length === _len) {
+					this.confirmResult = 'Nickname cannot be all spaces';
+					return false;
+				}
+				this.confirmResult = '';
+				return true;
+			},
 			confirmNickname: function() {
-				your_nickname = this.nickname;
-				var len = your_nickname.length,
-					check = your_nickname.match(/\s/g);
-				if (!len) {
-					alert('PLEASE ENTER YOUR NICKNAME!');
-					return;
-				}
-				if (check && check.length === len) {
-					alert('NICKNAME CANNOT BE ALL SPACES!');
-					return;
-				}
-				this.isNicknameShow = false;
-				uuid = UUID.generate();
-				// save now your name to recover msg
-				if (!localStorage.getItem('nickname')) {
-					localStorage.setItem('nickname', your_nickname + '_' + uuid);
-					your_old_name = your_nickname;
-				} else {
-					your_old_name = localStorage.getItem('nickname');
-					localStorage.setItem('nickname', your_nickname + '_' + uuid);
-				}
-				console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
-				$('.enter_nickname').hide();
-				if (!location.hash) {
-					location.href += '#nickname=' + your_nickname + '_' + uuid;
-				} else {
-					location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
+				if (this.checkNickname()) {
+					your_nickname = this.nickname;
+					this.isNicknameShow = false;
+					uuid = UUID.generate();
+					// save now your name to recover msg
+					if (!localStorage.getItem('nickname')) {
+						localStorage.setItem('nickname', your_nickname + '_' + uuid);
+						your_old_name = your_nickname;
+					} else {
+						your_old_name = localStorage.getItem('nickname');
+						localStorage.setItem('nickname', your_nickname + '_' + uuid);
+					}
+					console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
+					if (!location.hash) {
+						location.href += '#nickname=' + your_nickname + '_' + uuid;
+					} else {
+						location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
+					}
 				}
 			},
 			showEmojisTable: function(event) {
-				if (!this.isEmojisShow && event.target.className !== 'em all') {
-					// this.isEmojisShow = false;
+				if (!this.isEmojisShow && event.target.className !== 'em all')
 					return false;
-				}
 				this.isEmojisShow = !this.isEmojisShow;
 			},
 			chooseEmoji: function(index) {
-				this.message += '[' + emoji_input_name[index] + ']';
-				record_input_emoji_info = this.messages;
+				this.typeMessage += '[' + emoji_input_name[index] + ']';
+				record_input_emoji_info = this.typeMessage;
 				document.querySelector('.input').focus();
 			},
 			shakeWindow: function() {
@@ -107,41 +133,44 @@
 					_this.animateObject.shake = false;
 				}, false);
 			},
-			checkMesage: function(riei) {
-				record_input_emoji_info = riei;
-				console.info('record_input_emoji_info: ' + record_input_emoji_info);
-				var emojis = record_input_emoji_info.match(/\[[a-z_]+\]/g),
-					len = 0;
-				if (emojis !== null) { // have emoji(s)
-					len = emojis.length;
-					if (msg.indexOf('<') !== -1 || msg.indexOf('>') !== -1) {
-						msg = msg.replace(/<+/g, '&lt;');
-						msg = msg.replace(/>+/g, '&gt;');
-					}
-					for (var i = 0; i < len; i++) { // check emoji(s)
-						if (msg.indexOf(emojis[i]) !== -1) {
-							msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
+			getEmojiName: function(emoji) {
+				emoji = emoji.replace('[', '');
+				emoji = emoji.replace(']', '');
+				return emoji;
+			},
+			checkMessage: function() {
+				var _msg = this.typeMessage,
+					emojis = _msg.match(/\[[a-z_]+\]/g);
+				if (_msg.indexOf('<') !== -1) {
+					_msg = _msg.replace(/\</g, '&lt;');
+				}
+				if (_msg.indexOf('>') !== -1) {
+					_msg = _msg.replace(/\>/g, '&gt;');
+				}
+				if (emojis !== null) {
+					var i = 0,
+						len = emojis.length,
+						emoji_name;
+					for (; i < len; i++) {
+						emoji_name = this.getEmojiName(emojis[i]);
+						if (emoji_input_name.indexOf(emoji_name) !== -1) {
+							_msg = _msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
 						}
 					}
-					li.eq(0).append(msg);
-				} else { // no emoji(s)
-					li.eq(0).text(msg);
 				}
-				li.eq(0).append('<dt>' + nn + '</dt>');
-				return li;
+				this.transformMessage = _msg;
+				// console.log(this.transformMessage);
 			},
 			sendMessage: function() {
-				var msg = this.message;
-				if (msg === '') {
-					alert('CANNOT SEND BLANK MESSAGE!');
+				if (this.typeMessage === '') {
+					alert('Cannot send blank message!');
 					return;
 				}
 				socket.emit('chat', {
-					msg: msg,
-					riei: record_input_emoji_info,
+					msg: this.typeMessage,
 					people: your_nickname + '_' + uuid
 				});
-				msg = '';
+				this.typeMessage = '';
 			},
 			preloadImage: function(fn) {
 				var image = new Image();
@@ -153,7 +182,7 @@
 			sendImage: function(event) {
 				var _this = this,
 					_file,
-					_target = event.target
+					_target = event.target;
 				_target.onchange = function() {
 					_file = this.files[0];
 					val = this.value;
@@ -201,6 +230,45 @@
 		App.people = people;
 	});
 	
+	// chat
+	socket.on('chat', function(data) {
+		var people = data.people.split('_');
+		if (App.nickname === people[0] && uuid === people[1]) { // is you
+			// var right_height = $r_message.height();
+			App.yours.push({
+				msg: data.msg,
+				name: App.nickname
+			});
+			App.isEmojisShow = false;
+			// var right_len = $r_message.children('li').length;
+			// if ($l_message.height() > right_height) {
+			// 	$r_message.children('li').eq(right_len - 1).css({
+			// 		'margin-top': $l_message.height() - right_height + 24
+			// 	});
+			// }
+			// $inner.scrollTop($r_message.height());
+		} else { // not you
+		// 	if (checkPermission === 'granted') {
+		// 		var notify = new Notification(people[0], {
+		// 			body: data.msg,
+		// 			icon: '/img/notify.png',
+		// 			eventTime: 800
+		// 		});
+		// 	}
+		// 	other_message = checkMesage(data.msg, data.riei, people[0]);
+		// 	var left_height = $l_message.height();
+		// 	$l_message.append(other_message);
+		// 	$emoji_table.addClass('ghost');
+		// 	var left_len = $l_message.children('li').length;
+		// 	if ($r_message.height() > left_height) {
+		// 		$l_message.children('li').eq(left_len - 1).css({
+		// 			'margin-top': $r_message.height() - left_height + 24
+		// 		});
+		// 	}
+		// 	$inner.scrollTop($l_message.height());
+		}
+	});
+	
 	// send image
 	socket.on('send_image', function(data) {
 		var people = data.people.split('_');
@@ -243,134 +311,5 @@
 	});
 	
 	/* -------------------- Vue.js test end -------------------- */
-	
-	var $inner = $('.messages .inner'),
-		$l_message = $('.messages .left'),
-		$r_message = $('.messages .right'),
-		$emoji_all = $('.emoji .all'),
-		$emoji_table = $('.emoji .table'),
-		$wrapper = $('.wrapper'),
-		$info = $('.info');
-	
-	var your_message,
-		other_message,
-		save_chat_history = [];
-	
-	var record_input_emoji_info = 'blank';
-	
-	window.onbeforeunload = function() {
-		// return 1;
-	}
-	
-	// check notification
-	if ('Notification' in window) {
-		var permission = window.Notification.requestPermission(),
-			checkPermission = window.Notification.permission;
-	}
-	
-	// send message
-	// $input.on('keydown', function(event) {
-	// 	if (event.keyCode === 13 && !event.ctrlKey) {
-	// 		event.preventDefault();
-	// 		sendMessage();
-	// 	}
-	// 	if (event.keyCode === 13 && event.ctrlKey) {
-	// 		$(this).val($input.val() + '\n');
-	// 	}
-	// });
-	
-	// shake
-	// socket.on('pshake', function(data) {
-	// 	var phone_shake_people = data.people,
-	// 		phone_shake_uuid = data.uuid;
-	// 	shaking(phone_shake_people);
-	// });
-	
-	// online
-	
-	// offline
-	socket.on('offline', function(people) {
-		$people.text(people);
-	});
-	
-	// chat
-	socket.on('chat', function(data) {
-		var people = data.people.split('_');
-		if ($('.nickname').val() === people[0] && uuid === people[1]) { // is you
-			your_message = checkMesage(data.msg, data.riei, 'Me');
-			var right_height = $r_message.height();
-			$r_message.append(your_message);
-			$emoji_table.addClass('ghost');
-			var right_len = $r_message.children('li').length;
-			if ($l_message.height() > right_height) {
-				$r_message.children('li').eq(right_len - 1).css({
-					'margin-top': $l_message.height() - right_height + 24
-				});
-			}
-			$inner.scrollTop($r_message.height());
-		} else { // not you
-			if (checkPermission === 'granted') {
-				var notify = new Notification(people[0], {
-					body: data.msg,
-					icon: '/img/notify.png',
-					eventTime: 800
-				});
-			}
-			other_message = checkMesage(data.msg, data.riei, people[0]);
-			var left_height = $l_message.height();
-			$l_message.append(other_message);
-			$emoji_table.addClass('ghost');
-			var left_len = $l_message.children('li').length;
-			if ($r_message.height() > left_height) {
-				$l_message.children('li').eq(left_len - 1).css({
-					'margin-top': $r_message.height() - left_height + 24
-				});
-			}
-			$inner.scrollTop($l_message.height());
-		}
-	});
-	
-	// send image
-	
-	function sendMessage() {
-		
-	}
-	
-	function checkMesage(msg, riei, nn) {
-		record_input_emoji_info = riei;
-		console.info('record_input_emoji_info: ' + record_input_emoji_info);
-		var li = $('<li></li>'),
-			emojis = record_input_emoji_info.match(/\[[a-z_]+\]/g),
-			len = 0;
-		if (emojis !== null) { // have emoji(s)
-			len = emojis.length;
-			if (msg.indexOf('<') !== -1 || msg.indexOf('>') !== -1) {
-				msg = msg.replace(/<+/g, '&lt;');
-				msg = msg.replace(/>+/g, '&gt;');
-			}
-			for (var i = 0; i < len; i++) { // check emoji(s)
-				if (msg.indexOf(emojis[i]) !== -1) {
-					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
-				}
-			}
-			li.eq(0).append(msg);
-		} else { // no emoji(s)
-			li.eq(0).text(msg);
-		}
-		li.eq(0).append('<dt>' + nn + '</dt>');
-		return li;
-	}
-	
-	function sendImage(file) {
-		
-	}
-	
-	function preloadImage(src, fn) {
-		var image = new Image();
-		image.src = src;
-		image.onload = function() {
-			fn && fn();
-		}
-	}
 	
 }(this);

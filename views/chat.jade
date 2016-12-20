@@ -20,6 +20,7 @@ html(lang="en")
 					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname", @keyup.13.prevent="confirmNickname")
 					br
 					input.confirm(type="button", name="confirm", value="CONFIRM", @click.prevent="confirmNickname")
+					p.warn.tc(v-show="isWarnShow") {{confirmResult}}
 			.container
 				.wrapper.bc(:class="animateObject")
 					.whoiam.bc
@@ -31,11 +32,11 @@ html(lang="en")
 						.inner.clearfix
 							.left.fl
 								.msg(v-for="item in others")
-									span {{item.msg}}
+									span(v-html="item.msg")
 										dt {{item.name}}
 							.right.fr
 								.msg(v-for="item in yours")
-									span {{item.msg}}
+									span(v-html="item.msg")
 										dt {{item.name}}
 					.emoji
 						i.em.all(@click.stop="showEmojisTable")
@@ -45,7 +46,7 @@ html(lang="en")
 						.table.clearfix(v-show="isEmojisShow")
 							i(v-for="(ct, index) in cts", :class="ct.className", :title="ct.title", @click.prevent="chooseEmoji(index)")
 					.text.bc
-						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, v-model="message", @keyup.13.prevent="sendMessage")
+						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, v-model="typeMessage", @keyup.13.prevent="sendMessage")
 						input.send(type="button", name="send", value='SEND', @click.prevent="sendMessage")
 				p.tip Enter to send, Ctrl + Enter to wrap.
 		script(type="text/javascript" src="/vendor/jquery.min.js")

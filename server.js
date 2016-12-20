@@ -1,27 +1,27 @@
 // modules
-var express = require('express'),
-	http = require('http'),
-	bodyParser = require('body-parser'),
-	ejs = require('ejs'),
-	jade = require('jade'),
-	mysql = require('mysql'),
-	favicon = require('serve-favicon'),
-	uuid = require('uuid'),
-	fs = require('fs');
+const express = require('express');
+const http = require('http');
+const bodyParser = require('body-parser');
+const ejs = require('ejs');
+const jade = require('jade');
+const mysql = require('mysql');
+const favicon = require('serve-favicon');
+const uuid = require('uuid');
+const fs = require('fs');
 // routes
-var phone_shake = require('./routes/phone_shake'),
-	chat = require('./routes/chat');
+const phone_shake = require('./routes/phone_shake');
+const chat = require('./routes/chat');
 // config
-var mysql_config = require('./config/config').config;
+const mysql_config = require('./config/config').config;
 // utils
-var errMsg = require('./utils/errmsg'),
-	sqlQuery = require('./utils/query');
+const errMsg = require('./utils/errmsg');
+const sqlQuery = require('./utils/query');
 // port
-var port = process.env.PORT || 2261;
+const PORT = process.env.PORT || 2261;
 // server
-var app = express(),
-	server = http.createServer(app),
-	io = require('socket.io')(server);
+const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 // engine
 // app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
@@ -45,7 +45,7 @@ app.all('*', (req, res, next) => {
 	next();
 });
 // create mysql pool
-var pool = mysql.createPool(mysql_config);
+let pool = mysql.createPool(mysql_config);
 // get info
 app.get('/getInfo', (req, res) => {
 	pool.getConnection((err, connection) => {
@@ -65,7 +65,7 @@ app.get('/getInfo', (req, res) => {
 });
 // login
 app.post('/loginConfirm', (req, res) => {
-	var request = req.body;
+	let request = req.body;
 	pool.getConnection((err, connection) => {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
@@ -91,7 +91,7 @@ app.post('/loginConfirm', (req, res) => {
 });
 // register
 app.post('/register', (req, res) => {
-	var request = req.body,
+	let request = req.body,
 		values = [request.name, request.mobile, request.password, request.email, request.uid];
 	pool.getConnection((err, connection) => {
 		if (err) {
@@ -118,7 +118,7 @@ app.post('/register', (req, res) => {
 	});
 });
 // chat
-var p_count = 0,
+let p_count = 0,
 	phone_count,
 	user_names = [];
 io.on('connection', (socket) => {
@@ -147,11 +147,11 @@ io.on('connection', (socket) => {
 });
 // save image return to client
 app.post('/upload_image', (req, res) => {
-	var r = req.body;
+	let r = req.body;
 	
-	var ext = r.file.substr(0, 22).match(/(jpg|jpeg|png|gif)/)[0],
+	let ext = r.file.substr(0, 22).match(/(jpg|jpeg|png|gif)/)[0],
 		file = r.file.substr(22);
-	var file_name = uuid.v1({msec: new Date().getTime()}) + '.' + ext;
+	let file_name = uuid.v1({msec: new Date().getTime()}) + '.' + ext;
 	
 	fs.writeFile('public/upload/' + file_name, new Buffer(file, 'base64'), err => {
 		if (err) {
@@ -184,6 +184,6 @@ app.post('/save_chat', (req, res) => {
 	
 });
 // run server
-server.listen(port, () => {
-	console.log('Server is running at 127.0.0.1:' + port);
+server.listen(PORT, () => {
+	console.log('Server is running at 127.0.0.1:' + PORT);
 });
