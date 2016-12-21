@@ -2,9 +2,9 @@ const gulp = require('gulp');
 const plugins = require('gulp-load-plugins')();
 const pump = require('pump');
 
-const dev = ['public/vendor/socket.io.js', 'public/vendor/uuid.core.js', 'public/vendor/vue.min.js', 'public/vendor/axios.min.js'];
+const dev = ['public/vendor/socket.io.js', 'public/vendor/uuid.core.js', 'public/vendor/vue.min.js', 'public/vendor/axios.min.js', 'public/vendor/smooth-scroll.min.js'];
 
-const build = ['public/vendor/socket.io.js', 'public/vendor/uuid.core.js', 'public/vendor/vue.min.js', 'public/vendor/axios.min.js', 'public/js/chat.js'];
+const build = ['public/vendor/socket.io.js', 'public/vendor/uuid.core.js', 'public/vendor/vue.min.js', 'public/vendor/axios.min.js', 'public/vendor/smooth-scroll.min.js', 'public/js/chat.js'];
 
 gulp.task('dev', () => {
 	

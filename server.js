@@ -2,8 +2,7 @@
 const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
-const ejs = require('ejs');
-const jade = require('jade');
+const pug = require('pug');
 const mysql = require('mysql');
 const favicon = require('serve-favicon');
 const uuid = require('uuid');
@@ -25,7 +24,7 @@ const io = require('socket.io')(server);
 // engine
 // app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 // favicon
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // static files
@@ -124,21 +123,27 @@ let p_count = 0,
 io.on('connection', (socket) => {
 	p_count++;
 	// console.log('online people: ' + p_count);
+	
 	socket.on('chat', (data) => {
 		io.emit('chat', data);
 	});
+	
 	socket.on('online', ()=> {
 		io.emit('online', p_count);
 	});
-	socket.on('shake', shake => {
+	
+	socket.on('shake', (shake) => {
 		io.emit('shake', shake);
 	});
-	socket.on('send_image', data => {
+	
+	socket.on('send_image', (data) => {
 		io.emit('send_image', data);
 	});
-	socket.on('pshake', data => {
+	
+	socket.on('pshake', (data) => {
 		io.emit('pshake', data);
 	});
+	
 	socket.on('disconnect', () => {
 		p_count--;
 		// console.log('online people: ' + p_count);

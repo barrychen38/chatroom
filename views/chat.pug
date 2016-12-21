@@ -17,7 +17,7 @@ html(lang="en")
 			.enter_nickname(v-show="isNicknameShow")
 				.form
 					p PLEASE ENTER YOUR NAME
-					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname", @keyup.13.prevent="confirmNickname")
+					input.nickname(type="text", name="nickname", maxlength="20", autofocus, v-model="nickname", @keydown.13.prevent="confirmNickname")
 					br
 					input.confirm(type="button", name="confirm", value="CONFIRM", @click.prevent="confirmNickname")
 					p.warn.tc(v-show="isWarnShow") {{confirmResult}}
@@ -25,19 +25,20 @@ html(lang="en")
 				.wrapper.bc(:class="animateObject")
 					.whoiam.bc
 						span.name.fl {{nickname}}
-						span.info(v-show="isInfoShow") {{info}}
+						transition(name="fade")
+							span.info(v-show="isInfoShow") {{info}}
 						b.p_count.p_text.fr {{people}}
 						span.p_text.fr Online:&nbsp;&nbsp;
 					.messages.bc
 						.inner.clearfix
-							.left.fl
-								.msg(v-for="item in others")
-									span(v-html="item.msg")
-										dt {{item.name}}
-							.right.fr
-								.msg(v-for="item in yours")
-									span(v-html="item.msg")
-										dt {{item.name}}
+							transition(name="slide")
+								.left.fl
+									p.msg(v-for="item in others")
+										span(v-html="item.msg")
+							transition(name="slide")
+								.right.fr
+									p.msg(v-for="item in yours")
+										span(v-html="item.msg")
 					.emoji
 						i.em.all(@click.stop="showEmojisTable")
 						i.em.shake_btn(@click.prevent="shakeWindow")
@@ -46,7 +47,7 @@ html(lang="en")
 						.table.clearfix(v-show="isEmojisShow")
 							i(v-for="(ct, index) in cts", :class="ct.className", :title="ct.title", @click.prevent="chooseEmoji(index)")
 					.text.bc
-						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, v-model="typeMessage", @keyup.13.prevent="sendMessage")
+						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, v-model="typeMessage", @keydown.13.prevent="sendMessage")
 						input.send(type="button", name="send", value='SEND', @click.prevent="sendMessage")
 				p.tip Enter to send, Ctrl + Enter to wrap.
 		script(type="text/javascript" src="/vendor/jquery.min.js")

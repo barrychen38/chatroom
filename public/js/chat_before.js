@@ -33,7 +33,8 @@ $(function() {
 	var socket = io();
 	
 	var uuid,
-		record_input_emoji_info = 'blank';
+		record_input_emoji_info = 'blank',
+		MAX_WINDOW_HEIGHT = document.querySelector('.inner').offsetHeight;
 	
 	window.onbeforeunload = function() {
 		// return 1;
