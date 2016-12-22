@@ -5,13 +5,8 @@ html(lang="en")
 		meta(name="viewport", content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no")
 		title AlaChat
 		link(rel="icon", href="/faviocn.ico")
-		link(rel="stylesheet", href="/css/main.css")
+		link(rel="stylesheet", href="/dist/css/main.css")
 	body
-		
-		//- script#msg-template(type="text/x-template")
-		//- 	.msg(v-for="item in contents")
-		//- 		span {{item.msg}}
-		//- 			dt {{item.name}}
 		
 		#app(v-cloak, @click="showEmojisTable")
 			.enter_nickname(v-show="isNicknameShow")
@@ -30,27 +25,23 @@ html(lang="en")
 						b.p_count.p_text.fr {{people}}
 						span.p_text.fr Online:&nbsp;&nbsp;
 					.messages.bc
-						.inner.clearfix
-							transition(name="slide")
-								.left.fl
-									p.msg(v-for="item in others")
-										span(v-html="item.msg")
-							transition(name="slide")
-								.right.fr
-									p.msg(v-for="item in yours")
-										span(v-html="item.msg")
+						.inner
+							//- transition(name="fade")
+							.scroller
+								p.msg.clearfix(v-for="item in contents")
+									span.join(v-if="item.isJoinShow") {{item.nickname}}
+									span(v-else, v-html="item.msg", :class="[item.isYou ? rightClass : leftClass]")
 					.emoji
 						i.em.all(@click.stop="showEmojisTable")
 						i.em.shake_btn(@click.prevent="shakeWindow")
 						i.em.image
 							input.file(type="file", name="file", accept="images/*", @click="sendImage")
 						.table.clearfix(v-show="isEmojisShow")
-							i(v-for="(ct, index) in cts", :class="ct.className", :title="ct.title", @click.prevent="chooseEmoji(index)")
+							i(v-for="(emoji, index) in emojis", :class="emoji.className", :title="emoji.title", @click.prevent="chooseEmoji(index)")
 					.text.bc
 						textarea.input(name="input", placeholder="SEND MY MESSAGE", autofocus, v-model="typeMessage", @keydown.13.prevent="sendMessage")
-						input.send(type="button", name="send", value='SEND', @click.prevent="sendMessage")
+						//- input.send(type="button", name="send", value='SEND', @click.prevent="sendMessage")
 				p.tip Enter to send, Ctrl + Enter to wrap.
-		script(type="text/javascript" src="/vendor/jquery.min.js")
 		//- script(type="text/javascript" src="/dist/js/app.min.js")
 		script(type="text/javascript" src="/dist/js/lib.min.js")
 		script(type="text/javascript" src="/js/chat.js")

@@ -8,7 +8,6 @@ const favicon = require('serve-favicon');
 const uuid = require('uuid');
 const fs = require('fs');
 // routes
-const phone_shake = require('./routes/phone_shake');
 const chat = require('./routes/chat');
 // config
 const mysql_config = require('./config/config').config;
@@ -30,14 +29,13 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 // static files
 app.use(express.static(__dirname + '/public'));
 // use routes
-app.use('/phone_shake', phone_shake);
 app.use('/chat', chat);
 // parse request body
 app.use(bodyParser.json({limit: 1024*1024*5}));
 app.use(bodyParser.urlencoded({extended: true, limit: 1024*1024*5}));
 // apply all
 app.all('*', (req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "*");
+	// res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
 	res.header("Access-Control-Allow-Methods", "GET,POST");
 	// res.header("Content-Type", "application/json;charset=utf-8");
@@ -118,36 +116,47 @@ app.post('/register', (req, res) => {
 });
 // chat
 let p_count = 0,
-	phone_count,
-	user_names = [];
-io.on('connection', (socket) => {
+	phone_count;
+io.on('connection', socket => {
 	p_count++;
 	// console.log('online people: ' + p_count);
 	
-	socket.on('chat', (data) => {
+	socket.user = null;
+	
+	socket.on('chat', data => {
 		io.emit('chat', data);
 	});
 	
-	socket.on('online', ()=> {
+	socket.on('online', () => {
 		io.emit('online', p_count);
 	});
 	
-	socket.on('shake', (shake) => {
+	socket.on('user join', username => {
+		socket.user = username;
+		io.emit('user join', username);
+	});
+	
+	socket.on('shake', shake => {
 		io.emit('shake', shake);
 	});
 	
-	socket.on('send_image', (data) => {
-		io.emit('send_image', data);
+	socket.on('send image', data => {
+		io.emit('send image', data);
 	});
 	
-	socket.on('pshake', (data) => {
+	socket.on('pshake', data => {
 		io.emit('pshake', data);
 	});
 	
 	socket.on('disconnect', () => {
 		p_count--;
 		// console.log('online people: ' + p_count);
-		io.emit('offline', p_count);
+		if (socket.user !== null) {
+			io.emit('offline', {
+				count: p_count,
+				username: socket.user
+			});
+		}
 	});
 });
 // save image return to client

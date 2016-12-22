@@ -1,14 +1,8 @@
 !function(root) {
 	
-	// navigator to phone page
-	if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Windows Phone)/i)) {
-		location.href = '/phone_shake' + location.hash;
-		return;
-	}
-	
 	// ask sure to leave
 	window.onbeforeunload = function() {
-		// return 1;
+		return 1;
 	}
 	
 	// check notification
@@ -26,8 +20,7 @@
 		uuid,
 		your_nickname,
 		your_old_name,
-		record_input_emoji_info = 'blank',
-		MAX_WINDOW_HEIGHT = document.querySelector('.inner').offsetHeight;
+		MAX_WINDOW_HEIGHT = 380;
 	
 	var reader = new FileReader();
 	
@@ -42,9 +35,9 @@
 		el: '#app',
 		// components:
 		data: {
-			isNicknameShow: false,
+			isNicknameShow: true,
 			isWarnShow: true,
-			nickname: 'Barry',
+			nickname: '',
 			confirmResult: '',
 			isEmojisShow: false,
 			isInfoShow: false,
@@ -52,19 +45,25 @@
 				animated: false,
 				shake: false
 			},
-			cts: [],
+			emojis: [],
 			people: 0,
+			rightClass: 'right',
+			leftClass: 'left',
 			info: '',
 			typeMessage: '',
-			others: [],
-			yours: [],
+			contents: []
 		},
 		watch: {
 			nickname: function() {
 				this.checkNickname();
-			},
-			typeMessage: function() {
-				this.deleteMessage();
+			}
+		},
+		created: function() {
+			for (var i = 0; i < emoji_len; i++) {
+				this.emojis.push({
+					className: emoji_name[i],
+					title: emoji_input_name[i]
+				});
 			}
 		},
 		methods: {
@@ -87,6 +86,7 @@
 					your_nickname = this.nickname;
 					this.isNicknameShow = false;
 					uuid = UUID.generate();
+					socket.emit('user join', your_nickname);
 					// save now your name to recover msg
 					if (!localStorage.getItem('nickname')) {
 						localStorage.setItem('nickname', your_nickname + '_' + uuid);
@@ -110,7 +110,6 @@
 			},
 			chooseEmoji: function(index) {
 				this.typeMessage += '[' + emoji_input_name[index] + ']';
-				record_input_emoji_info = this.typeMessage;
 				document.querySelector('.input').focus();
 			},
 			showInfo: function(info_msg) {
@@ -125,35 +124,24 @@
 				}, 1000);
 			},
 			shakeWindow: function() {
-				var _this = this,
-					_wrapper = document.querySelector('.wrapper');
 				socket.emit('shake', this.nickname);
-				socket.on('shake', function(people) {
-					_this.animateObject.animated = true;
-					_this.animateObject.shake = true;
-					_this.showInfo(_this.nickname + ' SHAKED.');
-				});
-				_wrapper.addEventListener('animationend', function() {
-					_this.animateObject.animated = false;
-					_this.animateObject.shake = false;
-				}, false);
 			},
 			getEmojiName: function(emoji) {
 				emoji = emoji.replace('[', '');
 				emoji = emoji.replace(']', '');
 				return emoji;
 			},
-			checkMessage: function(message) {
-				var _msg = message,
-					emojis = _msg.match(/\[[a-z_]+\]/g);
-				if (_msg.indexOf('<') !== -1) {
-					_msg = _msg.replace(/\</g, '&lt;');
+			checkMessage: function(msg) {
+				var _message = msg,
+					emojis = _message.match(/\[[a-z_]+\]/g);
+				if (_message.indexOf('<') !== -1) {
+					_message = _message.replace(/\</g, '&lt;');
 				}
-				if (_msg.indexOf('>') !== -1) {
-					_msg = _msg.replace(/\>/g, '&gt;');
+				if (_message.indexOf('>') !== -1) {
+					_message = _message.replace(/\>/g, '&gt;');
 				}
-				if (_msg.indexOf('\n') !== -1 && _msg.match(/\n/g).length === _msg.length) {
-					_msg = _msg.replace(/\n/g, '');
+				if (_message.indexOf('\n') !== -1 && _message.match(/\n/g).length === _message.length) {
+					_message = _message.replace(/\n/g, '');
 				}
 				if (emojis !== null) {
 					var i = 0,
@@ -162,14 +150,11 @@
 					for (; i < len; i++) {
 						emoji_name = this.getEmojiName(emojis[i]);
 						if (emoji_input_name.indexOf(emoji_name) !== -1) {
-							_msg = _msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
+							_message = _message.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
 						}
 					}
 				}
-				return _msg;
-			},
-			deleteMessage: function() {
-				
+				return _message;
 			},
 			sendMessage: function(event) {
 				var transformMessage = this.checkMessage(this.typeMessage);
@@ -219,7 +204,7 @@
 							if (response.data.readyState === 1) {
 								_target.removeAttribute('disabled');
 								val = '';
-								socket.emit('send_image', {
+								socket.emit('send image', {
 									img_url: response.data.img_url,
 									people: your_nickname + '_' + uuid
 								});
@@ -228,24 +213,26 @@
 					}
 				}
 			},
-			alertMessage: function(people, body) {
+			scrollInner: function() {
+				var $scroller = document.querySelector('.inner'),
+					diffHeight = $scroller.scrollHeight - MAX_WINDOW_HEIGHT;
+				if (diffHeight <= 0) return;
+				$scroller.scrollTop = diffHeight;
+			},
+			alertMessage: function(user, body) {
 				if (checkPermission === 'granted') {
-					var notify = new Notification(people, {
+					var notify = new Notification(user, {
 						body: body,
-						icon: '/img/notify.png',
+						icon: '/dist/img/notify.png',
 						eventTime: 800
 					});
 				}
 			}
+		},
+		computed: {
+			
 		}
 	});
-	
-	for (var i = 0; i < emoji_len; i++) {
-		App.cts.push({
-			className: emoji_name[i],
-			title: emoji_input_name[i]
-		});
-	}
 	
 	// online
 	socket.emit('online');
@@ -253,48 +240,96 @@
 		App.people = people;
 	});
 	
+	// user join
+	socket.on('user join', function(username) {
+		App.contents.push({
+			isJoinShow: true,
+			nickname: username + ' join the group chat.'
+		});
+		Vue.nextTick(function() {
+			App.scrollInner();
+		});
+	});
+	
+	// offline
+	socket.on('offline', function(people) {
+		App.people = people.count;
+		App.contents.push({
+			isJoinShow: true,
+			nickname: people.username + ' leave the group chat.'
+		});
+		Vue.nextTick(function() {
+			App.scrollInner();
+		});
+	});
+	
+	// shake window
+	var _wrapper = document.querySelector('.wrapper');
+	socket.on('shake', function(people) {
+		App.animateObject.animated = true;
+		App.animateObject.shake = true;
+		App.showInfo(people + ' SHAKED.');
+	});
+	_wrapper.addEventListener('animationend', function() {
+		App.animateObject.animated = false;
+		App.animateObject.shake = false;
+	}, false);
+	
 	// chat
 	socket.on('chat', function(data) {
 		var _people = data.people.split('_'),
-			_msg = data.msg;
+			_msg = data.msg,
+			_msg_obj = null;
 		if (App.nickname === _people[0] && uuid === _people[1]) { // is you
 			_msg = App.checkMessage(_msg);
-			App.yours.push({
+			_msg_obj = {
+				isJoinShow: false,
 				msg: _msg + '<dt>Me</dt>',
-				name: 'Me'
-			});
+				isYou: true
+			}
 		} else { // not you
-			// App.alertMessage(_people[0], _msg);
+			App.alertMessage(_people[0], _msg);
 			_msg = App.checkMessage(_msg);
-			App.others.push({
+			_msg_obj = {
+				isJoinShow: false,
 				msg: _msg + '<dt>' + _people[0] + '</dt>',
-				name: _people[0]
-			});
+				isYou: false
+			}
 		}
+		App.contents.push(_msg_obj);
+		Vue.nextTick(function() {
+			App.scrollInner();
+		});
 		App.typeMessage = '';
 		App.isEmojisShow = false;
 	});
 	
 	// send image
-	socket.on('send_image', function(data) {
+	socket.on('send image', function(data) {
 		var _people = data.people.split('_'),
-			_img_url = data.img_url;
+			_img_url = data.img_url,
+			_img_obj = null;
+		App.isJoinShow = false;
 		if (App.nickname === _people[0] && uuid === _people[1]) { // is you
-			App.preloadImage(_img_url, function() {
-				App.yours.push({
-					msg: '<img src="' + _img_url + '"><dt>Me</dt>',
-					name: 'Me'
-				});
-			});
+			_img_obj = {
+				isJoinShow: false,
+				msg: '<img src="' + _img_url + '"><dt>Me</dt>',
+				isYou: true
+			}
 		} else {
-			// App.alertMessage(_people[0], 'Send a photo in Group Chat.');
-			App.preloadImage(_img_url, function() {
-				App.others.push({
-					msg: '<img src="' + _img_url + '"><dt>' + _people[0] + '</dt>',
-					name: _people[0]
-				});
-			});
+			App.alertMessage(_people[0], 'Send a photo in Group Chat.');
+			_img_obj = {
+				isJoinShow: false,
+				msg: '<img src="' + _img_url + '"><dt>' + _people[0] + '</dt>',
+				isYou: false
+			}
 		}
+		App.preloadImage(_img_url, function() {
+			App.contents.push(_img_obj);
+			Vue.nextTick(function() {
+				App.scrollInner();
+			});
+		});
 	});
 	
 }(this);
