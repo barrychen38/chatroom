@@ -1,42 +1,8 @@
-$(function() {
+!function(root) {
 	
-	if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Windows Phone)/i)) {
-		location.href = '/phone_shake' + location.hash;
-		return;
-	}
-	
-	// define emojis
-	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-scream', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum', 'em em-mask', 'em em-boy', 'em em-alien', 'em em-clap', 'em em-facepunch', 'em em-girl', 'em em-imp', 'em em-monkey_face', 'em em-octocat', 'em em-rage', 'em em-see_no_evil', 'em em-smiling_imp', 'em em-speak_no_evil', 'em em-thumbsup', 'em em-thumbsdown', 'em em-v', 'em em-trollface', 'em em-dog', 'em em-broken_heart'],
-		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
-		emoji_len = emoji_name.length;
-	
-	var $confirm = $('.confirm'),
-		$nickname = $('.nickname'),
-		$input = $('.input'),
-		$inner = $('.messages .inner'),
-		$l_message = $('.messages .left'),
-		$r_message = $('.messages .right'),
-		$people = $('.whoiam .p_count'),
-		$shake = $('.emoji .shake'),
-		$send_image = $('.emoji .file'),
-		$emoji_all = $('.emoji .all'),
-		$emoji_table = $('.emoji .table'),
-		$wrapper = $('.wrapper'),
-		$info = $('.info');
-	
-	var your_nickname,
-		your_message,
-		other_message,
-		your_old_name,
-		save_chat_history = [];
-	
-	var socket = io();
-	
-	var uuid,
-		record_input_emoji_info = 'blank';
-	
+	// ask sure to leave
 	window.onbeforeunload = function() {
-		// return 1;
+		return 1;
 	}
 	
 	// check notification
@@ -45,288 +11,325 @@ $(function() {
 			checkPermission = window.Notification.permission;
 	}
 	
-	// check nickname
-	$confirm.on('click', function(event) {
-		event.preventDefault();
-		checkNickname();
-	});
-	$nickname.on('keydown', function(event) {
-		if (event.keyCode === 13) {
-			event.preventDefault();
-			checkNickname();
-		}
-	});
+	// define emojis
+	var emoji_name = ['em em-angry', 'em em-anguished', 'em em-astonished', 'em em-blush', 'em em-cold_sweat', 'em em-confounded', 'em em-confused', 'em em-cry', 'em em-disappointed', 'em em-disappointed_relieved', 'em em-dizzy_face', 'em em-expressionless', 'em em-fearful', 'em em-flushed', 'em em-frowning', 'em em-grimacing', 'em em-grin', 'em em-grinning', 'em em-heart_eyes', 'em em-hushed', 'em em-innocent', 'em em-joy', 'em em-kissing_heart', 'em em-laughing', 'em em-neutral_face', 'em em-no_mouth', 'em em-open_mouth', 'em em-scream', 'em em-pensive', 'em em-persevere', 'em em-relaxed', 'em em-satisfied', 'em em-smile', 'em em-sleepy', 'em em-smirk', 'em em-sob', 'em em-stuck_out_tongue_closed_eyes', 'em em-sunglasses', 'em em-sweat_smile', 'em em-tired_face', 'em em-yum', 'em em-mask', 'em em-boy', 'em em-alien', 'em em-clap', 'em em-facepunch', 'em em-girl', 'em em-imp', 'em em-monkey_face', 'em em-octocat', 'em em-rage', 'em em-see_no_evil', 'em em-smiling_imp', 'em em-speak_no_evil', 'em em-thumbsup', 'em em-thumbsdown', 'em em-v', 'em em-trollface', 'em em-dog', 'em em-broken_heart'],
+		emoji_input_name = ['angry', 'anguished', 'astonished', 'blush', 'cold_sweat', 'confounded', 'confused', 'cry', 'disappointed', 'disappointed_relieved', 'dizzy_face', 'expressionless', 'fearful', 'flushed', 'frowning', 'grimacing', 'grin', 'grinning', 'heart_eyes', 'hushed', 'innocent', 'joy', 'kissing_heart', 'laughing', 'neutral_face', 'no_mouth', 'open_mouth', 'scream', 'pensive', 'persevere', 'relaxed', 'satisfied', 'smile', 'sleepy', 'smirk', 'sob', 'stuck_out_tongue_closed_eyes', 'sunglasses', 'sweat_smile', 'tired_face', 'yum', 'mask', 'boy', 'alien', 'clap', 'facepunch', 'girl', 'imp', 'monkey_face', 'octocat', 'rage', 'see_no_evil', 'smiling_imp', 'speak_no_evil', 'thumbsup', 'thumbsdown', 'v', 'trollface', 'dog', 'broken_heart'],
+		emoji_len = emoji_name.length;
 	
-	// append emojis
-	for (var i = 0; i < emoji_len; i++) {
-		var i_tag = $('<i></i>');
-		i_tag.addClass(emoji_name[i]);
-		i_tag.attr('title', emoji_input_name[i]);
-		$emoji_table.append(i_tag);
-	}
-	var $emoji_choose = $emoji_table.children('i');
-	$emoji_choose.on('click', function() {
-		$input.val($input.val() + '[' + emoji_input_name[$(this).index()] + ']');
-		record_input_emoji_info = $input.val();
-		$input.focus();
-	});
-	$emoji_all.on('click', function() {
-		$emoji_table.toggleClass('ghost');
-		return false;
-	});
-	$('body').on('click', function(event) {
-		if (!$emoji_table.hasClass('ghost') && event.target !== $emoji_all[0]) {
-			$emoji_table.addClass('ghost');
-		}
-		// return false;
-	});
+	var socket = io(),
+		uuid,
+		your_nickname,
+		your_old_name,
+		MAX_WINDOW_HEIGHT = 380;
 	
-	// send message
-	$input.on('keydown', function(event) {
-		if (event.keyCode === 13 && !event.ctrlKey) {
-			event.preventDefault();
-			sendMessage();
-		}
-		if (event.keyCode === 13 && event.ctrlKey) {
-			$(this).val($input.val() + '\n');
-		}
-	});
-	$('.send').on('click', sendMessage);
-	
-	// send image
 	var reader = new FileReader();
-	$send_image.on('change', function(event) {
-		var file = event.target.files[0];
-		if (!file.type.match(/(jpg|jpeg|png|gif)/g)) {
-			alert('PLEASE SEND A IMAGE.');
-			$send_image.val('');
-			return;
-		}
-		if (file.size > 1024*1024*5) {
-			alert('Please upload a photo less than 5MB.');
-			$send_image.val('');
-			return;
-		}
-		$(this).attr('disabled');
-		reader.readAsDataURL(file);
-		reader.onload = function() {
-			sendImage(this.result);
-			$send_image.val('');
-		}
-	});
 	
-	// shake
-	var showTimer;
-	$shake.on('click', function() {
-		socket.emit('shake', $('.whoiam .name').text());
-		// return false;
-	});
-	socket.on('shake', function(shake) {
-		shaking(shake);
-	});
-	$wrapper.on('webkitAnimationEnd animationend', function() {
-		$(this).removeClass('animated shake');
-	});
-	socket.on('pshake', function(data) {
-		var phone_shake_people = data.people,
-			phone_shake_uuid = data.uuid;
-		shaking(phone_shake_people);
+	// Vue.component('msg-list', {
+	// 	template: '#msg-template',
+	// 	props: ['contents']
+	// });
+	
+	Vue.config.devtools = true;
+	
+	var App = new Vue({
+		el: '#app',
+		// components:
+		data: {
+			isNicknameShow: true,
+			isWarnShow: true,
+			nickname: '',
+			confirmResult: '',
+			isEmojisShow: false,
+			isInfoShow: false,
+			animateObject: {
+				animated: false,
+				shake: false
+			},
+			emojis: [],
+			people: 0,
+			rightClass: 'right',
+			leftClass: 'left',
+			info: '',
+			typeMessage: '',
+			contents: []
+		},
+		watch: {
+			nickname: function() {
+				this.checkNickname();
+			}
+		},
+		created: function() {
+			for (var i = 0; i < emoji_len; i++) {
+				this.emojis.push({
+					className: emoji_name[i],
+					title: emoji_input_name[i]
+				});
+			}
+		},
+		methods: {
+			checkNickname: function() {
+				var _len = this.nickname.length,
+					_check = this.nickname.match(/\s/g);
+				if (!_len) {
+					this.confirmResult = 'Please enter a nickname';
+					return false;
+				}
+				if (_check && _check.length === _len) {
+					this.confirmResult = 'Nickname cannot be all spaces';
+					return false;
+				}
+				this.confirmResult = '';
+				return true;
+			},
+			confirmNickname: function() {
+				if (this.checkNickname()) {
+					your_nickname = this.nickname;
+					this.isNicknameShow = false;
+					uuid = UUID.generate();
+					socket.emit('user join', your_nickname);
+					// save now your name to recover msg
+					if (!localStorage.getItem('nickname')) {
+						localStorage.setItem('nickname', your_nickname + '_' + uuid);
+						your_old_name = your_nickname;
+					} else {
+						your_old_name = localStorage.getItem('nickname');
+						localStorage.setItem('nickname', your_nickname + '_' + uuid);
+					}
+					console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
+					if (!location.hash) {
+						location.href += '#nickname=' + your_nickname + '_' + uuid;
+					} else {
+						location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
+					}
+				}
+			},
+			showEmojisTable: function(event) {
+				if (!this.isEmojisShow && event.target.className !== 'em all')
+					return false;
+				this.isEmojisShow = !this.isEmojisShow;
+			},
+			chooseEmoji: function(index) {
+				this.typeMessage += '[' + emoji_input_name[index] + ']';
+				document.querySelector('.input').focus();
+			},
+			showInfo: function(info_msg) {
+				var _this = this,
+					showTimer;
+				clearTimeout(showTimer);
+				_this.isInfoShow = true;
+				_this.info = info_msg;
+				showTimer = setTimeout(function() {
+					_this.isInfoShow = false;
+					// _this.info = '';
+				}, 1000);
+			},
+			shakeWindow: function() {
+				socket.emit('shake', this.nickname);
+			},
+			getEmojiName: function(emoji) {
+				emoji = emoji.replace('[', '');
+				emoji = emoji.replace(']', '');
+				return emoji;
+			},
+			checkMessage: function(msg) {
+				var _message = msg,
+					emojis = _message.match(/\[[a-z_]+\]/g);
+				if (_message.indexOf('<') !== -1) {
+					_message = _message.replace(/\</g, '&lt;');
+				}
+				if (_message.indexOf('>') !== -1) {
+					_message = _message.replace(/\>/g, '&gt;');
+				}
+				if (_message.indexOf('\n') !== -1 && _message.match(/\n/g).length === _message.length) {
+					_message = _message.replace(/\n/g, '');
+				}
+				if (emojis !== null) {
+					var i = 0,
+						len = emojis.length,
+						emoji_name;
+					for (; i < len; i++) {
+						emoji_name = this.getEmojiName(emojis[i]);
+						if (emoji_input_name.indexOf(emoji_name) !== -1) {
+							_message = _message.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
+						}
+					}
+				}
+				return _message;
+			},
+			sendMessage: function(event) {
+				var transformMessage = this.checkMessage(this.typeMessage);
+				if (event.ctrlKey) {
+					this.typeMessage += '\n';
+					return;
+				}
+				if (transformMessage === '') {
+					this.showInfo('Cannot send blank message.');
+					return;
+				}
+				socket.emit('chat', {
+					msg: this.typeMessage,
+					people: your_nickname + '_' + uuid
+				});
+			},
+			preloadImage: function(src, fn) {
+				var image = new Image();
+				image.src = src;
+				image.onload = function() {
+					fn && fn();
+				}
+			},
+			sendImage: function(event) {
+				var _this = this,
+					_file,
+					_target = event.target;
+				_target.onchange = function() {
+					_file = this.files[0];
+					val = this.value;
+					if (!_file.type.match(/(jpg|jpeg|png|gif)/g)) {
+						_this.showInfo('Please choose an Image.');
+						val = '';
+						return;
+					}
+					if (_file.size > 1024*1024*5) {
+						_this.showInfo('Please choose an Image less than 5MB.');
+						val = '';
+						return;
+					}
+					_target.setAttribute('disabled', 'disabled');
+					reader.readAsDataURL(_file);
+					reader.onload = function() {
+						axios.post('/upload_image', {
+							file: this.result
+						}).then(function(response) {
+							if (response.data.readyState === 1) {
+								_target.removeAttribute('disabled');
+								val = '';
+								socket.emit('send image', {
+									img_url: response.data.img_url,
+									people: your_nickname + '_' + uuid
+								});
+							}
+						});
+					}
+				}
+			},
+			scrollInner: function() {
+				var $scroller = document.querySelector('.inner'),
+					diffHeight = $scroller.scrollHeight - MAX_WINDOW_HEIGHT;
+				if (diffHeight <= 0) return;
+				$scroller.scrollTop = diffHeight;
+			},
+			alertMessage: function(user, body) {
+				if (checkPermission === 'granted') {
+					var notify = new Notification(user, {
+						body: body,
+						icon: '/dist/img/notify.png',
+						eventTime: 800
+					});
+				}
+			}
+		},
+		computed: {
+			
+		}
 	});
 	
 	// online
 	socket.emit('online');
 	socket.on('online', function(people) {
-		$people.text(people);
+		App.people = people;
+	});
+	
+	// user join
+	socket.on('user join', function(username) {
+		App.contents.push({
+			isJoinShow: true,
+			nickname: username + ' join the group chat.'
+		});
+		Vue.nextTick(function() {
+			App.scrollInner();
+		});
 	});
 	
 	// offline
 	socket.on('offline', function(people) {
-		$people.text(people);
+		App.people = people.count;
+		App.contents.push({
+			isJoinShow: true,
+			nickname: people.username + ' leave the group chat.'
+		});
+		Vue.nextTick(function() {
+			App.scrollInner();
+		});
 	});
+	
+	// shake window
+	var _wrapper = document.querySelector('.wrapper');
+	socket.on('shake', function(people) {
+		App.animateObject.animated = true;
+		App.animateObject.shake = true;
+		App.showInfo(people + ' SHAKED.');
+	});
+	_wrapper.addEventListener('animationend', function() {
+		App.animateObject.animated = false;
+		App.animateObject.shake = false;
+	}, false);
 	
 	// chat
 	socket.on('chat', function(data) {
-		var people = data.people.split('_');
-		if ($('.nickname').val() === people[0] && uuid === people[1]) { // is you
-			your_message = checkMesage(data.msg, data.riei, 'Me');
-			var right_height = $r_message.height();
-			$r_message.append(your_message);
-			$emoji_table.addClass('ghost');
-			var right_len = $r_message.children('li').length;
-			if ($l_message.height() > right_height) {
-				$r_message.children('li').eq(right_len - 1).css({
-					'margin-top': $l_message.height() - right_height + 24
-				});
+		var _people = data.people.split('_'),
+			_msg = data.msg,
+			_msg_obj = null;
+		if (App.nickname === _people[0] && uuid === _people[1]) { // is you
+			_msg = App.checkMessage(_msg);
+			_msg_obj = {
+				isJoinShow: false,
+				msg: _msg + '<dt>Me</dt>',
+				isYou: true
 			}
-			$inner.scrollTop($r_message.height());
 		} else { // not you
-			if (checkPermission === 'granted') {
-				var notify = new Notification(people[0], {
-					body: data.msg,
-					icon: '/img/notify.png',
-					eventTime: 800
-				});
+			App.alertMessage(_people[0], _msg);
+			_msg = App.checkMessage(_msg);
+			_msg_obj = {
+				isJoinShow: false,
+				msg: _msg + '<dt>' + _people[0] + '</dt>',
+				isYou: false
 			}
-			other_message = checkMesage(data.msg, data.riei, people[0]);
-			var left_height = $l_message.height();
-			$l_message.append(other_message);
-			$emoji_table.addClass('ghost');
-			var left_len = $l_message.children('li').length;
-			if ($r_message.height() > left_height) {
-				$l_message.children('li').eq(left_len - 1).css({
-					'margin-top': $r_message.height() - left_height + 24
-				});
-			}
-			$inner.scrollTop($l_message.height());
 		}
+		App.contents.push(_msg_obj);
+		Vue.nextTick(function() {
+			App.scrollInner();
+		});
+		App.typeMessage = '';
+		App.isEmojisShow = false;
 	});
 	
 	// send image
-	socket.on('send_image', function(data) {
-		var people = data.people.split('_');
-		if ($('.nickname').val() === people[0] && uuid === people[1]) { // is you
-			var right_height = $r_message.height();
-			preloadImage(data.img_url, function() {
-				$r_message.append('<li><img src="' + data.img_url + '"><dt>Me</dt></li>');
-				var right_len = $r_message.children('li').length;
-				if ($l_message.height() > right_height) {
-					$r_message.children('li').eq(right_len - 1).css({
-						'margin-top': $l_message.height() - right_height + 24
-					});
-				}
-				$inner.scrollTop($r_message.height());
-				$send_image.removeAttr('disabled');
-			});
-		} else {
-			if (checkPermission === 'granted') {
-				var notify = new Notification(people[0], {
-					body: 'Send a photo in Group Chat.',
-					icon: '/img/notify.png',
-					eventTime: 800
-				});
+	socket.on('send image', function(data) {
+		var _people = data.people.split('_'),
+			_img_url = data.img_url,
+			_img_obj = null;
+		App.isJoinShow = false;
+		if (App.nickname === _people[0] && uuid === _people[1]) { // is you
+			_img_obj = {
+				isJoinShow: false,
+				msg: '<img src="' + _img_url + '"><dt>Me</dt>',
+				isYou: true
 			}
-			var left_height = $l_message.height();
-			preloadImage(data.img_url, function() {
-				$l_message.append('<li><img src="' + data.img_url + '"><dt>' + people[0] + '</dt></li>');
-				var left_len = $l_message.children('li').length;
-				if ($r_message.height() > left_height) {
-					$l_message.children('li').eq(left_len - 1).css({
-						'margin-top': $r_message.height() - left_height + 24
-					});
-				}
-				$inner.scrollTop($l_message.height());
-				$send_image.removeAttr('disabled');
-			});
+		} else {
+			App.alertMessage(_people[0], 'Send a photo in Group Chat.');
+			_img_obj = {
+				isJoinShow: false,
+				msg: '<img src="' + _img_url + '"><dt>' + _people[0] + '</dt>',
+				isYou: false
+			}
 		}
+		App.preloadImage(_img_url, function() {
+			App.contents.push(_img_obj);
+			Vue.nextTick(function() {
+				App.scrollInner();
+			});
+		});
 	});
 	
-	function shaking(people) {
-		clearTimeout(showTimer);
-		$wrapper.addClass('animated shake');
-		$info.show();
-		$info.text(people + ' SHAKED');
-		showTimer = setTimeout(function() {
-			$info.fadeOut(400);
-		}, 900);
-	}
-	
-	function checkNickname() {
-		var nn = $('.nickname').val(),
-			len = nn.length,
-			check = nn.match(/\s/g);
-		if (!len) {
-			alert('PLEASE ENTER YOUR NICKNAME!');
-			return;
-		}
-		if (check && check.length === len) {
-			alert('NICKNAME CANNOT BE ALL SPACES!');
-			return;
-		}
-		$('.whoiam .name').text(nn);
-		uuid = UUID.generate();
-		your_nickname = nn;
-		// save now your name to recover msg
-		if (!localStorage.getItem('nickname')) {
-			localStorage.setItem('nickname', your_nickname + '_' + uuid);
-			your_old_name = your_nickname;
-		} else {
-			your_old_name = localStorage.getItem('nickname');
-			localStorage.setItem('nickname', your_nickname + '_' + uuid);
-		}
-		console.log('your_old_nickname: ' + your_old_name + '\nyour_nickname: ' + your_nickname);
-		$('.enter_nickname').hide();
-		if (!location.hash) {
-			location.href += '#nickname=' + your_nickname + '_' + uuid;
-		} else {
-			location.href = location.origin + location.pathname + '#nickname=' + your_nickname + '_' + uuid;
-		}
-	}
-	
-	function sendMessage() {
-		if ($input.val() === '') {
-			alert('CANNOT SEND BLANK MESSAGE!');
-		} else {
-			socket.emit('chat', {
-				msg: $input.val(),
-				riei: record_input_emoji_info,
-				people: your_nickname + '_' + uuid
-			});
-			$input.val('');
-			return false;
-		}
-	}
-	
-	function checkMesage(msg, riei, nn) {
-		record_input_emoji_info = riei;
-		console.info('record_input_emoji_info: ' + record_input_emoji_info);
-		var li = $('<li></li><br>'),
-			emojis = record_input_emoji_info.match(/\[[a-z_]+\]/g),
-			len = 0;
-		if (emojis !== null) { // have emoji(s)
-			len = emojis.length;
-			if (msg.indexOf('<') !== -1 || msg.indexOf('>') !== -1) {
-				msg = msg.replace(/<+/g, '&lt;');
-				msg = msg.replace(/>+/g, '&gt;');
-			}
-			for (var i = 0; i < len; i++) { // check emoji(s)
-				if (msg.indexOf(emojis[i]) !== -1) {
-					msg = msg.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
-				}
-			}
-			li.eq(0).append(msg);
-		} else { // no emoji(s)
-			li.eq(0).text(msg);
-		}
-		li.eq(0).append('<dt>' + nn + '</dt>');
-		return li;
-	}
-	
-	function sendImage(file) {
-		$.ajax({
-			url: '/upload_image',
-			type: 'POST',
-			dataType: 'json',
-			data: {
-				file: file
-			},
-			success: function(data) {
-				var result = data.readState;
-				if (result === 1) {
-					socket.emit('send_image', {
-						img_url: data.img_url,
-						people: your_nickname + '_' + uuid
-					});
-				}
-			}
-		});
-	}
-	
-	function preloadImage(src, fn) {
-		var image = new Image();
-		image.src = src;
-		image.onload = function() {
-			fn && fn();
-		}
-	}
-	
-});
+}(this);

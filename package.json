@@ -13,16 +13,19 @@
   "author": "funnychen38",
   "license": "ISC",
   "devDependencies": {
-    "async": "^2.1.2",
     "body-parser": "^1.15.2",
-    "ejs": "^2.5.2",
-    "eventproxy": "^0.3.5",
     "express": "^4.14.0",
-    "jade": "^1.11.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-load-plugins": "^1.4.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^2.0.0",
     "mysql": "^2.11.1",
+    "pug": "^2.0.0-beta6",
+    "pump": "^1.0.1",
     "serve-favicon": "^2.3.0",
     "socket.io": "^1.5.1",
-    "uuid": "^2.0.3",
-    "vue": "^2.0.8"
+    "uuid": "^2.0.3"
   }
 }

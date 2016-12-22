@@ -1,51 +1,48 @@
 // modules
-var express = require('express'),
-	http = require('http'),
-	bodyParser = require('body-parser'),
-	ejs = require('ejs'),
-	jade = require('jade'),
-	mysql = require('mysql'),
-	favicon = require('serve-favicon'),
-	uuid = require('uuid'),
-	fs = require('fs');
+const express = require('express');
+const http = require('http');
+const bodyParser = require('body-parser');
+const pug = require('pug');
+const mysql = require('mysql');
+const favicon = require('serve-favicon');
+const uuid = require('uuid');
+const fs = require('fs');
 // routes
-var phone_shake = require('./routes/phone_shake'),
-	chat = require('./routes/chat');
+const chat = require('./routes/chat');
 // config
-var mysql_config = require('./config/config').config;
+const mysql_config = require('./config/config').config;
 // utils
-var errMsg = require('./utils/errmsg'),
-	sqlQuery = require('./utils/query');
+const errMsg = require('./utils/errmsg');
+const sqlQuery = require('./utils/query');
 // port
-var port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 2261;
 // server
-var app = express(),
-	server = http.createServer(app),
-	io = require('socket.io')(server);
+const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 // engine
 // app.engine('html', ejs.__express);
 app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 // favicon
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // static files
 app.use(express.static(__dirname + '/public'));
 // use routes
-app.use('/phone_shake', phone_shake);
 app.use('/chat', chat);
 // parse request body
 app.use(bodyParser.json({limit: 1024*1024*5}));
 app.use(bodyParser.urlencoded({extended: true, limit: 1024*1024*5}));
 // apply all
 app.all('*', (req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "*");
+	// res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
 	res.header("Access-Control-Allow-Methods", "GET,POST");
 	// res.header("Content-Type", "application/json;charset=utf-8");
 	next();
 });
 // create mysql pool
-var pool = mysql.createPool(mysql_config);
+let pool = mysql.createPool(mysql_config);
 // get info
 app.get('/getInfo', (req, res) => {
 	pool.getConnection((err, connection) => {
@@ -65,7 +62,7 @@ app.get('/getInfo', (req, res) => {
 });
 // login
 app.post('/loginConfirm', (req, res) => {
-	var request = req.body;
+	let request = req.body;
 	pool.getConnection((err, connection) => {
 		if (err) {
 			res.send(JSON.stringify(errMsg.sql_connect_error));
@@ -91,7 +88,7 @@ app.post('/loginConfirm', (req, res) => {
 });
 // register
 app.post('/register', (req, res) => {
-	var request = req.body,
+	let request = req.body,
 		values = [request.name, request.mobile, request.password, request.email, request.uid];
 	pool.getConnection((err, connection) => {
 		if (err) {
@@ -118,48 +115,65 @@ app.post('/register', (req, res) => {
 	});
 });
 // chat
-var p_count = 0,
-	phone_count,
-	user_names = [];
-io.on('connection', (socket) => {
+let p_count = 0,
+	phone_count;
+io.on('connection', socket => {
 	p_count++;
-	console.log('online people: ' + p_count);
-	socket.on('chat', (data) => {
+	// console.log('online people: ' + p_count);
+	
+	socket.user = null;
+	
+	socket.on('chat', data => {
 		io.emit('chat', data);
 	});
-	socket.on('online', ()=> {
+	
+	socket.on('online', () => {
 		io.emit('online', p_count);
 	});
+	
+	socket.on('user join', username => {
+		socket.user = username;
+		io.emit('user join', username);
+	});
+	
 	socket.on('shake', shake => {
 		io.emit('shake', shake);
 	});
-	socket.on('send_image', data => {
-		io.emit('send_image', data);
+	
+	socket.on('send image', data => {
+		io.emit('send image', data);
 	});
+	
 	socket.on('pshake', data => {
 		io.emit('pshake', data);
 	});
+	
 	socket.on('disconnect', () => {
 		p_count--;
-		console.log('online people: ' + p_count);
-		io.emit('offline', p_count);
+		// console.log('online people: ' + p_count);
+		if (socket.user !== null) {
+			io.emit('offline', {
+				count: p_count,
+				username: socket.user
+			});
+		}
 	});
 });
 // save image return to client
 app.post('/upload_image', (req, res) => {
-	var r = req.body;
+	let r = req.body;
 	
-	var ext = r.file.substr(0, 22).match(/(jpg|jpeg|png|gif)/)[0],
+	let ext = r.file.substr(0, 22).match(/(jpg|jpeg|png|gif)/)[0],
 		file = r.file.substr(22);
-	var file_name = uuid.v1({msec: new Date().getTime()}) + '.' + ext;
+	let file_name = uuid.v1({msec: new Date().getTime()}) + '.' + ext;
 	
 	fs.writeFile('public/upload/' + file_name, new Buffer(file, 'base64'), err => {
 		if (err) {
-			res.send(JSON.stringify({readState: 0, msg: 'Upload failed.'}));
+			res.send(JSON.stringify({readyState: 0, msg: 'Upload failed.'}));
 			return;
 		}
 	});
-	res.send(JSON.stringify({readState: 1, img_url: '/upload/' + file_name}));
+	res.send(JSON.stringify({readyState: 1, img_url: '/upload/' + file_name}));
 });
 // get chat history
 app.get('/get_chat_history', (req, res) => {
@@ -184,6 +198,6 @@ app.post('/save_chat', (req, res) => {
 	
 });
 // run server
-server.listen(port, () => {
-	console.log('Server is running at 127.0.0.1:' + port);
+server.listen(PORT, () => {
+	console.log('Server is running at 127.0.0.1:' + PORT);
 });
