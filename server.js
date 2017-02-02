@@ -94,8 +94,9 @@ app.post('/upload_image', (req, res) => {
 	fs.writeFile('public/upload/' + file_name, new Buffer(file, 'base64'), err => {
 		if (err) {
 			data = JSON.stringify({readyState: 0, msg: 'Upload failed.'});
+		} else {
+			data = JSON.stringify({readyState: 1, img_url: '/upload/' + file_name});
 		}
-		data = JSON.stringify({readyState: 1, img_url: '/upload/' + file_name});
 		res.send(data);
 	});
 });
