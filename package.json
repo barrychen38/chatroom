@@ -4,28 +4,36 @@
   "description": "A chat room based on nodejs",
   "main": "server.js",
   "scripts": {
-    "chat": "node server.js"
+    "dev": "gulp dev",
+    "build": ""
   },
   "keywords": [
     "nodejs",
+    "socket.io",
     "chat"
   ],
-  "author": "funnychen38",
+  "author": "Barry Chen",
   "license": "ISC",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "mongodb": "^2.2.31",
+    "mongoose": "^4.11.7",
+    "pug": "^2.0.0-rc.3",
+    "socket.io": "^2.0.3",
+    "socket.io-client": "^2.0.3",
+    "uuid": "^3.1.0"
+  },
   "devDependencies": {
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
+    "browserify": "^14.4.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-load-plugins": "^1.4.0",
     "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.0.0",
-    "mysql": "^2.11.1",
-    "pug": "^2.0.0-beta6",
     "pump": "^1.0.1",
-    "serve-favicon": "^2.3.0",
-    "socket.io": "^1.5.1",
-    "uuid": "^2.0.3"
+    "vinyl-source-stream": "^1.1.0"
   }
 }

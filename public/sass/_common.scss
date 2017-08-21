@@ -34,6 +34,15 @@ html, body {
 	margin-right: auto;
 }
 
+.box-shadow {
+	-webkit-box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2),
+											0 2px 2px 0 rgba(0, 0, 0, .14),
+											0 1px 5px 0 rgba(0, 0, 0, .12);
+	box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2),
+							0 2px 2px 0 rgba(0, 0, 0, .14),
+							0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
 .ghost {
 	display: none;
 }
@@ -53,7 +62,7 @@ input {
 	position: absolute;
 	top: 0;
 	left: 0;
-	background: #2a333c;
+	background: #fafafa;
 	color: #333;
 	z-index: 6;
 }
@@ -77,22 +86,23 @@ input {
 		left: 50%;
 		-webkit-transform: translateX(-50%);
 		transform: translateX(-50%);
-		p {
-			font-size: 24px;
-		}
+		// p {
+		// 	font-size: 24px;
+		// }
 	}
 	.nickname {
 		text-align: center;
 		border: 0;
-		border-bottom: 1px solid #ccc;
+		// border-bottom: 1px solid #ccc;
 		font-size: 20px;
 		color: #777;
 	}
 	.confirm {
-		border: 1px solid #81cc7a;
-		background: #81cc7a;
+		border: 1px solid #3f51b5;
+		background: #3f51b5;
 		color: #fff;
 		border-radius: 4px;
+		padding: 8px 12px;
 	}
 	p.warn {
 		color: $warn;
@@ -115,17 +125,20 @@ input {
 		line-height: 32px;
 		text-align: center;
 		padding: 12px;
-		/*background: #fff;*/
+		background: #3f51b5;
+		color: #fff;
 		font-size: 16px;
-		border-bottom: 1px solid #ddd;
 		margin-top: 80px;
 		cursor: default;
+		border-radius: 4px 4px 0 0;
+		-webkit-box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2),
+												0 6px 10px 0 rgba(0, 0, 0, .14),
+												0 1px 18px 0 rgba(0, 0, 0, .12);
+		box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2),
+								0 6px 10px 0 rgba(0, 0, 0, .14),
+								0 1px 18px 0 rgba(0, 0, 0, .12);
 		.p_text {
 			font-size: 14px;
-			color: #777;
-		}
-		.info {
-			color: #ef6f67;
 		}
 	}
 	.messages {
@@ -152,17 +165,26 @@ input {
 			}
 		}
 		span {
+
+			$space-top: 3px;
+			$space-right: 4px;
+
+			$left-color: #3f51b5;
+			$right-color: #e0e0e0;
+
 			display: inline-block;
 			max-width: 200px;
 			height: auto;
 			padding: 8px;
-			border-radius: 4px;
-			/*overflow: hidden;*/
+			// border-radius: 4px;
+			// overflow: hidden;
 			position: relative;
 			margin-top: 24px;
-			font-size: 14px;	
+			font-size: 14px;
 			white-space: pre-wrap;
 			word-wrap: break-word;
+			letter-spacing: .4px;
+
 			&.join {
 				margin-top: 0;
 				padding: 0;
@@ -174,38 +196,43 @@ input {
 				&:after {
 					content: '';
 					position: absolute;
-					top: 50%;
-					-webkit-transform: translateY(-50%);
-					transform: translateY(-50%);
+					top: 0;
 					display: block;
 					width: 0;
 					height: 0;
-					border: 8px solid transparent;
+					border-color: transparent;
+					border-style: solid;
+					@each $postion, $width in (top: $space-top, right: $space-right, bottom: $space-top, left: $space-right) {
+						border-#{$postion}-width: $width;
+					}
 				}
 			}
 			&.left {
+				color: #fff;
 				float: left;
-				background: #D9F4FE;
-				margin-left: 8px;
+				background: $left-color;
+				margin-left: 2 * $space-right;
 				&:after {
-					border-right-color: #D9F4FE;
-					left: -16px;
+					border-right-color: $left-color;
+					border-top-color: $left-color;
+					left: -2 * $space-right;
 				}
 				dt:last-child {
-					left: 6px;
+					left: 0;
 					white-space: nowrap;
 				}
 			}
 			&.right {
 				float: right;
-				background: #F3F3F3;
-				margin-right: 8px;
+				background: $right-color;
+				margin-right: 2 * $space-right;
 				&:after {
-					border-left-color: #F3F3F3;
-					right: -16px;
+					border-left-color: $right-color;
+					border-top-color: $right-color;
+					right: -2 * $space-right;
 				}
 				dt:last-child {
-					right: 6px;
+					right: 0;
 					white-space: nowrap;
 				}
 			}
@@ -235,13 +262,13 @@ input {
 			cursor: pointer;
 		}
 		.all {
-			background-image: url(../img/all.png);
+			background-image: url(img/all.png);
 		}
-		.shake_btn {
-			background-image: url(../img/shake.png);
-		}
+		// .shake_btn {
+		// 	background-image: url(img/shake.png);
+		// }
 		.image {
-			background-image: url(../img/image.png);
+			background-image: url(img/image.png);
 			position: relative;
 			.file {
 				position: absolute;
@@ -317,7 +344,6 @@ input {
 		// }
 	}
 	.tip {
-		color: #fff;
 		font-size: 12px;
 		text-align: center;
 		padding: 12px 0;
@@ -326,8 +352,7 @@ input {
 	}
 }
 
-/* animate start */
-
+/*-------- animate start --------*/
 .fade-enter-active, .fade-leave-active {
 	-webkit-transition: opacity .3s;
 	transition: opacity .3s;
@@ -336,53 +361,52 @@ input {
 	opacity: 0;
 }
 
-.animated {
-	-webkit-animation-duration: 0.5s;
-	animation-duration: 0.5s;
-	-webkit-animation-fill-mode: both;
-	animation-fill-mode: both;
-}
+// .animated {
+// 	-webkit-animation-duration: 0.5s;
+// 	animation-duration: 0.5s;
+// 	-webkit-animation-fill-mode: both;
+// 	animation-fill-mode: both;
+// }
 
-@-webkit-keyframes shake {
-	0%, 100% {
-		-webkit-transform: translate3d(0, 0, 0);
-		transform: translate3d(0, 0, 0);
-	}
+// @-webkit-keyframes shake {
+// 	0%, 100% {
+// 		-webkit-transform: translate3d(0, 0, 0);
+// 		transform: translate3d(0, 0, 0);
+// 	}
 
-	10%, 30%, 50%, 70%, 90% {
-		-webkit-transform: translate3d(-12px, 0, 0);
-		transform: translate3d(-12px, 0, 0);
-	}
+// 	10%, 30%, 50%, 70%, 90% {
+// 		-webkit-transform: translate3d(-12px, 0, 0);
+// 		transform: translate3d(-12px, 0, 0);
+// 	}
 
-	20%, 40%, 60%, 80% {
-		-webkit-transform: translate3d(12px, 0, 0);
-		transform: translate3d(12px, 0, 0);
-	}
-}
+// 	20%, 40%, 60%, 80% {
+// 		-webkit-transform: translate3d(12px, 0, 0);
+// 		transform: translate3d(12px, 0, 0);
+// 	}
+// }
 
-@keyframes shake {
-	0%, 100% {
-		-webkit-transform: translate3d(0, 0, 0);
-		transform: translate3d(0, 0, 0);
-	}
+// @keyframes shake {
+// 	0%, 100% {
+// 		-webkit-transform: translate3d(0, 0, 0);
+// 		transform: translate3d(0, 0, 0);
+// 	}
 
-	10%, 30%, 50%, 70%, 90% {
-		-webkit-transform: translate3d(-12px, 0, 0);
-		transform: translate3d(-12px, 0, 0);
-	}
+// 	10%, 30%, 50%, 70%, 90% {
+// 		-webkit-transform: translate3d(-12px, 0, 0);
+// 		transform: translate3d(-12px, 0, 0);
+// 	}
 
-	20%, 40%, 60%, 80% {
-		-webkit-transform: translate3d(12px, 0, 0);
-		transform: translate3d(12px, 0, 0);
-	}
-}
+// 	20%, 40%, 60%, 80% {
+// 		-webkit-transform: translate3d(12px, 0, 0);
+// 		transform: translate3d(12px, 0, 0);
+// 	}
+// }
 
-.shake {
-	-webkit-animation-name: shake;
-	animation-name: shake;
-}
-
-/* animate end */
+// .shake {
+// 	-webkit-animation-name: shake;
+// 	animation-name: shake;
+// }
+/*-------- animate end --------*/
 
 @media screen and (max-width: 640px) {
 	.enter_nickname,
