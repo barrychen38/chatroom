@@ -8,5 +8,8 @@ npm-debug.*
 # sass
 .sass-cache
 
+# upload
+public/upload/*
+
 # system
 *.DS_Store

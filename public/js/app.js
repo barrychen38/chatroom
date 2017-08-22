@@ -13,9 +13,8 @@ module.exports = function(Vue, io) {
 	var emojiLength = emoji.names.length;
 
 	var socket = io(),
-		uuid,
+		id,
 		yourNickname,
-		yourOldName,
 		MAX_WINDOW_HEIGHT = 380;
 
 	var reader = new FileReader();
@@ -27,6 +26,7 @@ module.exports = function(Vue, io) {
 		data: {
 			isNicknameShow: true,
 			isWarnShow: true,
+			isGettingMsg: false,
 			nickname: '',
 			confirmResult: '',
 			isEmojisShow: false,
@@ -55,6 +55,22 @@ module.exports = function(Vue, io) {
 			}
 
 		},
+
+		mounted: function() {
+			var _this = this;
+			_this.isGettingMsg = true;
+			service.getLastestMsg()
+				.then(function(response) {
+					if (response.data) {
+						_this.isGettingMsg = false;
+					}
+				})
+				.catch(function(error) {
+					_this.isGettingMsg = false;
+					console.error(error.message);
+				})
+		},
+
 		methods: {
 
 			checkNickname: function() {
@@ -76,16 +92,10 @@ module.exports = function(Vue, io) {
 				if (this.checkNickname()) {
 					yourNickname = this.nickname;
 					this.isNicknameShow = false;
-					uuid = 'sdfsfafd';
-					socket.emit('user join', yourNickname);
-					// save now your name to recover msg
-					if (!helper.getItem('uuid')) {
-						helper.setItem('uuid', uuid);
-						yourOldName = yourNickname;
-					} else {
-						yourOldName = helper.getItem('uuid');
-						helper.setItem('uuid', uuid);
-					}
+					socket.emit('user join', {
+						username: yourNickname,
+						id: helper.getItem('id')
+					});
 				}
 			},
 
@@ -156,7 +166,8 @@ module.exports = function(Vue, io) {
 				}
 				socket.emit('chat', {
 					msg: this.typeMessage,
-					people: yourNickname + '-' + uuid
+					people: yourNickname,
+					id: id
 				});
 			},
 
@@ -195,7 +206,8 @@ module.exports = function(Vue, io) {
 									val = '';
 									socket.emit('send image', {
 										imgUrl: response.data.imgUrl,
-										people: yourNickname + '-' + uuid
+										people: yourNickname,
+										id: id
 									});
 								}
 							})
@@ -207,10 +219,12 @@ module.exports = function(Vue, io) {
 			},
 
 			scrollInner: function() {
-				var $scroller = document.querySelector('.inner'),
-					diffHeight = $scroller.scrollHeight - MAX_WINDOW_HEIGHT;
-				if (diffHeight <= 0) return;
-				$scroller.scrollTop = diffHeight;
+				var scroller = document.querySelector('.inner'),
+					diffHeight = scroller.scrollHeight - MAX_WINDOW_HEIGHT;
+				if (diffHeight <= 0) {
+					return;
+				}
+				scroller.scrollTop = diffHeight;
 			},
 
 			alertMessage: function(user, body) {
@@ -226,18 +240,21 @@ module.exports = function(Vue, io) {
 		}
 	});
 
-	// online
+	// Online
 	socket.emit('online');
 	socket.on('online', function(people) {
 		Chat.people = people;
 	});
 
-	// user join
-	socket.on('user join', function(username) {
+	// User join
+	socket.on('user join', function(data) {
+
+		helper.setItem('id', data.id);
+		id = data.id;
 
 		Chat.contents.push({
 			isJoinShow: true,
-			nickname: username + ' join the group chat.'
+			nickname: data.username + ' join the group chat.'
 		});
 
 		Vue.nextTick(function() {
@@ -246,7 +263,7 @@ module.exports = function(Vue, io) {
 
 	});
 
-	// offline
+	// Offline
 	socket.on('offline', function(people) {
 
 		Chat.people = people.count;
@@ -261,33 +278,12 @@ module.exports = function(Vue, io) {
 
 	});
 
-	// chat
+	// Chat
 	socket.on('chat', function(data) {
 
-		var _people = data.people.split('-'),
-			_msg = data.msg,
-			_msg_obj = null;
+		var msgItem = checkUser(data);
 
-		// is yourself
-		if (Chat.nickname === _people[0] && uuid === _people[1]) {
-			_msg = Chat.checkMessage(_msg);
-			_msg_obj = {
-				isJoinShow: false,
-				msg: _msg + '<dt>Me</dt>',
-				isYou: true
-			}
-		// someone else
-		} else {
-			Chat.alertMessage(_people[0], _msg);
-			_msg = Chat.checkMessage(_msg);
-			_msg_obj = {
-				isJoinShow: false,
-				msg: _msg + '<dt>' + _people[0] + '</dt>',
-				isYou: false
-			}
-		}
-
-		Chat.contents.push(_msg_obj);
+		Chat.contents.push(msgItem);
 		Vue.nextTick(function() {
 			Chat.scrollInner();
 		});
@@ -296,38 +292,71 @@ module.exports = function(Vue, io) {
 
 	});
 
-	// send image
+	// Send image
 	socket.on('send image', function(data) {
-
-		var _people = data.people.split('-'),
-			_imgUrl = data.imgUrl,
-			_img_obj = null;
 
 		Chat.isJoinShow = false;
 
-		if (Chat.nickname === _people[0] && uuid === _people[1]) { // is you
-			_img_obj = {
-				isJoinShow: false,
-				msg: '<img src="' + _imgUrl + '"><dt>Me</dt>',
-				isYou: true
-			}
-		} else {
-			Chat.alertMessage(_people[0], 'Send a photo in Group Chat.');
-			_img_obj = {
-				isJoinShow: false,
-				msg: '<img src="' + _imgUrl + '"><dt>' + _people[0] + '</dt>',
-				isYou: false
-			}
-		}
+		var msgItem = checkUser(data);
 
-
-		Chat.preloadImage(_imgUrl, function() {
-			Chat.contents.push(_img_obj);
+		Chat.preloadImage(data.imgUrl, function() {
+			Chat.contents.push(msgItem);
 			Vue.nextTick(function() {
 				Chat.scrollInner();
 			});
 		});
 
 	});
+
+	/**
+	 * Check user
+	 */
+	function checkUser(data) {
+
+		var _people = data.people,
+				_id = data.id;
+
+		var msgItem = {
+			isJoinShow: false,
+			isYou: true
+		};
+
+		var transformMsg;
+
+		// It is you
+		if (Chat.nickname === _people && id === _id) {
+
+			// Send message
+			if (data.msg) {
+				transformMsg = Chat.checkMessage(data.msg);
+				msgItem.msg = transformMsg + '<dt>Me</dt>';
+				return msgItem;
+			}
+
+			// Send image
+			msgItem.msg = '<img src="' + data.imgUrl + '"><dt>Me</dt>';
+			return msgItem;
+
+		}
+
+		// It is not you
+		msgItem.isYou = false;
+
+		if (data.msg) {
+
+			// Send message
+			Chat.alertMessage(_people, data.msg);
+			transformMsg = Chat.checkMessage(data.msg);
+			msgItem.msg = transformMsg + '<dt>' + _people + '</dt>';
+			return msgItem;
+
+		}
+
+		// Send image
+		Chat.alertMessage(_people, 'Send a photo in Group Chat.');
+		msgItem.msg = '<img src="' + data.imgUrl + '"><dt>' + _people + '</dt>';
+		return msgItem;
+
+	}
 
 }

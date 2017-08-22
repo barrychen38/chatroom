@@ -4,9 +4,14 @@ let fs = require('fs');
 
 let router = express.Router();
 
-router.post('/upload', (req, res) => {
+router.use((req, res, next) => {
 
 	res.setHeader('Content-Type', 'application/json');
+	next();
+
+});
+
+router.post('/upload', (req, res) => {
 
 	let body = req.body,
 		data = null;

@@ -1,4 +1,6 @@
 var axios = require('axios');
+var helper = require('./helper');
+var Promise = require('es6-promise').Promise;
 
 module.exports = {
 
@@ -7,7 +9,7 @@ module.exports = {
 	 *
 	 * @return Promise
 	 */
-	uploadImage: (file) => {
+	uploadImage: function(file) {
 		var url = '/upload';
 		return axios.post(url, {
 			file: file
@@ -19,16 +21,16 @@ module.exports = {
 	 *
 	 * @return Promise
 	 */
-	getLastestMsg: () => {
+	getLastestMsg: function() {
 
-	},
+		if (!helper.getItem('id')) {
+			return new Promise(function(resolve, reject) {
+				resolve('No history before.');
+			});
+		}
 
-	/**
-	 * Save the last chat messages(10)
-	 *
-	 * @return Promise
-	 */
-	saveLastMsg: () => {
+		let url = '/messages';
+		return axios.get(url);
 
 	}
 

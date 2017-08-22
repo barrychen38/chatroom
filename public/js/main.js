@@ -3,5 +3,5 @@ var io = require('socket.io-client');
 
 Vue.config.devtools = false;
 
-require('./notify')();
+// require('./notify')();
 require('./app')(Vue, io);

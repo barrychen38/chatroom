@@ -125,5 +125,5 @@ module.exports = {
 		'trollface',
 		'dog',
 		'broken_heart'
-	],
+	]
 }
