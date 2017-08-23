@@ -17,14 +17,14 @@ let db = mongoose.connect(DB_URI, {
 });
 
 db.then(() => {
-	console.log('\033[42m>>> we are in. <<<\033[0m');
+	console.log('\033[42m>>> we are in.\033[0m');
 }, (error) => {
 	console.error(error);
 });
 
 let schema = new mongoose.Schema({
-	uuid: String,
-	username: String,
+	chatId: String,
+	user: String,
 	text: String
 });
 

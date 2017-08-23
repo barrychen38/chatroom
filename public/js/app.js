@@ -7,15 +7,16 @@ module.exports = function(Vue, io) {
 	// Check notification
 	if ('Notification' in window) {
 		var permission = window.Notification.requestPermission(),
-			checkPermission = window.Notification.permission;
+				checkPermission = window.Notification.permission;
 	}
 
 	var emojiLength = emoji.names.length;
 
 	var socket = io(),
-		id,
-		yourNickname,
-		MAX_WINDOW_HEIGHT = 380;
+			chatId,
+			user,
+			yourNickname,
+			MAX_WINDOW_HEIGHT = 380;
 
 	var reader = new FileReader();
 
@@ -32,7 +33,7 @@ module.exports = function(Vue, io) {
 			isEmojisShow: false,
 			isInfoShow: false,
 			emojis: [],
-			people: 0,
+			peopleCount: 0,
 			rightMsgClass: 'right',
 			leftMsgClass: 'left',
 			info: '',
@@ -57,11 +58,20 @@ module.exports = function(Vue, io) {
 		},
 
 		mounted: function() {
+
+			// Get the info first to judge who you are
+			chatId = helper.getItem('chatId');
+			user = helper.getItem('user');
+
 			var _this = this;
 			_this.isGettingMsg = true;
 			service.getLastestMsg()
 				.then(function(response) {
 					if (response.data) {
+						var msgLength = response.data.length;
+						for (var i = 0; i < msgLength; i++) {
+							showMsg(response.data[i], false);
+						}
 						_this.isGettingMsg = false;
 					}
 				})
@@ -75,13 +85,13 @@ module.exports = function(Vue, io) {
 
 			checkNickname: function() {
 				var _len = this.nickname.length,
-					_check = this.nickname.match(/\s/g);
+						_check = this.nickname.match(/\s/g);
 				if (!_len) {
 					this.confirmResult = 'Please enter a nickname';
 					return false;
 				}
 				if (_check && _check.length === _len) {
-					this.confirmResult = 'Nickname cannot be all spaces';
+					this.confirmResult = 'Nickname can not be all spaces';
 					return false;
 				}
 				this.confirmResult = '';
@@ -93,8 +103,8 @@ module.exports = function(Vue, io) {
 					yourNickname = this.nickname;
 					this.isNicknameShow = false;
 					socket.emit('user join', {
-						username: yourNickname,
-						id: helper.getItem('id')
+						user: yourNickname,
+						chatId: helper.getItem('chatId')
 					});
 				}
 			},
@@ -112,7 +122,7 @@ module.exports = function(Vue, io) {
 
 			showInfo: function(info_msg) {
 				var _this = this,
-					showTimer;
+						showTimer;
 				clearTimeout(showTimer);
 				_this.isInfoShow = true;
 				_this.info = info_msg;
@@ -130,7 +140,7 @@ module.exports = function(Vue, io) {
 
 			checkMessage: function(msg) {
 				var _message = msg,
-					emojis = _message.match(/\[[a-z_]+\]/g);
+						emojis = _message.match(/\[[a-z_]+\]/g);
 				if (_message.indexOf('<') !== -1) {
 					_message = _message.replace(/\</g, '&lt;');
 				}
@@ -142,8 +152,8 @@ module.exports = function(Vue, io) {
 				}
 				if (emojis !== null) {
 					var i = 0,
-						len = emojis.length,
-						emojiName;
+							len = emojis.length,
+							emojiName;
 					for (; i < len; i++) {
 						emojiName = this.getEmojiName(emojis[i]);
 						if (emoji.inputNames.indexOf(emojiName) !== -1) {
@@ -161,13 +171,13 @@ module.exports = function(Vue, io) {
 					return;
 				}
 				if (transformMessage === '') {
-					this.showInfo('Cannot send blank message.');
+					this.showInfo('Can not send blank message.');
 					return;
 				}
 				socket.emit('chat', {
-					msg: this.typeMessage,
-					people: yourNickname,
-					id: id
+					text: this.typeMessage,
+					user: yourNickname,
+					chatId: chatId
 				});
 			},
 
@@ -181,8 +191,8 @@ module.exports = function(Vue, io) {
 
 			sendImage: function(event) {
 				var _this = this,
-					_file,
-					_target = event.target;
+						_file,
+						_target = event.target;
 				_target.onchange = function() {
 					_file = this.files[0];
 					val = this.value;
@@ -205,9 +215,9 @@ module.exports = function(Vue, io) {
 									_target.removeAttribute('disabled');
 									val = '';
 									socket.emit('send image', {
-										imgUrl: response.data.imgUrl,
-										people: yourNickname,
-										id: id
+										image: response.data.image,
+										user: yourNickname,
+										chatId: chatId
 									});
 								}
 							})
@@ -220,7 +230,7 @@ module.exports = function(Vue, io) {
 
 			scrollInner: function() {
 				var scroller = document.querySelector('.inner'),
-					diffHeight = scroller.scrollHeight - MAX_WINDOW_HEIGHT;
+						diffHeight = scroller.scrollHeight - MAX_WINDOW_HEIGHT;
 				if (diffHeight <= 0) {
 					return;
 				}
@@ -242,19 +252,35 @@ module.exports = function(Vue, io) {
 
 	// Online
 	socket.emit('online');
-	socket.on('online', function(people) {
-		Chat.people = people;
+	socket.on('online', function(peopleCount) {
+		Chat.peopleCount = peopleCount;
 	});
 
 	// User join
 	socket.on('user join', function(data) {
 
-		helper.setItem('id', data.id);
-		id = data.id;
+		helper.setItem('chatId', data.chatId);
+		helper.setItem('user', data.user);
+
+		// Set the new info of you
+		chatId = data.chatId;
+		user = data.user;
+
+		if (Chat.contents.length) {
+			Chat.contents.push(
+				{
+					isJoinShow: true,
+					text: 'History Message.'
+				}, {
+					isJoinShow: true,
+					text: '--------------------------------'
+				}
+			);
+		}
 
 		Chat.contents.push({
 			isJoinShow: true,
-			nickname: data.username + ' join the group chat.'
+			text: data.user + ' join the group chat.'
 		});
 
 		Vue.nextTick(function() {
@@ -269,7 +295,7 @@ module.exports = function(Vue, io) {
 		Chat.people = people.count;
 		Chat.contents.push({
 			isJoinShow: true,
-			nickname: people.username + ' leave the group chat.'
+			nickname: people.user + ' leave the group chat.'
 		});
 
 		Vue.nextTick(function() {
@@ -281,12 +307,7 @@ module.exports = function(Vue, io) {
 	// Chat
 	socket.on('chat', function(data) {
 
-		var msgItem = checkUser(data);
-
-		Chat.contents.push(msgItem);
-		Vue.nextTick(function() {
-			Chat.scrollInner();
-		});
+		showMsg(data);
 		Chat.typeMessage = '';
 		Chat.isEmojisShow = false;
 
@@ -297,44 +318,54 @@ module.exports = function(Vue, io) {
 
 		Chat.isJoinShow = false;
 
-		var msgItem = checkUser(data);
-
-		Chat.preloadImage(data.imgUrl, function() {
-			Chat.contents.push(msgItem);
-			Vue.nextTick(function() {
-				Chat.scrollInner();
-			});
+		Chat.preloadImage(data.image, function() {
+			showMsg(data);
 		});
 
 	});
 
+	function showMsg(data, showAlert) {
+
+		var msgItem = checkUser(data, showAlert);
+
+		Chat.contents.push(msgItem);
+		Vue.nextTick(function() {
+			Chat.scrollInner();
+		});
+	}
+
 	/**
 	 * Check user
 	 */
-	function checkUser(data) {
+	function checkUser(data, showAlert) {
 
-		var _people = data.people,
-				_id = data.id;
+		// Default is true
+		if (typeof showAlert === 'undefined') {
+			showAlert = true;
+		}
+
+		var _people = data.user,
+				_id =  data.chatId;
 
 		var msgItem = {
 			isJoinShow: false,
 			isYou: true
 		};
 
-		var transformMsg;
+		var transformText;
 
 		// It is you
-		if (Chat.nickname === _people && id === _id) {
+		if (user === _people && chatId === _id) {
 
 			// Send message
-			if (data.msg) {
-				transformMsg = Chat.checkMessage(data.msg);
-				msgItem.msg = transformMsg + '<dt>Me</dt>';
+			if (data.text) {
+				transformText = Chat.checkMessage(data.text);
+				msgItem.text = transformText + '<dt>Me</dt>';
 				return msgItem;
 			}
 
 			// Send image
-			msgItem.msg = '<img src="' + data.imgUrl + '"><dt>Me</dt>';
+			msgItem.text = '<img src="' + data.image + '"><dt>Me</dt>';
 			return msgItem;
 
 		}
@@ -342,19 +373,23 @@ module.exports = function(Vue, io) {
 		// It is not you
 		msgItem.isYou = false;
 
-		if (data.msg) {
+		if (data.text) {
 
 			// Send message
-			Chat.alertMessage(_people, data.msg);
-			transformMsg = Chat.checkMessage(data.msg);
-			msgItem.msg = transformMsg + '<dt>' + _people + '</dt>';
+			if (showAlert) {
+				Chat.alertMessage(_people, data.text);
+			}
+			transformText = Chat.checkMessage(data.text);
+			msgItem.text = transformText + '<dt>' + _people + '</dt>';
 			return msgItem;
 
 		}
 
 		// Send image
-		Chat.alertMessage(_people, 'Send a photo in Group Chat.');
-		msgItem.msg = '<img src="' + data.imgUrl + '"><dt>' + _people + '</dt>';
+		if (showAlert) {
+			Chat.alertMessage(_people, 'Send a photo in Group Chat.');
+		}
+		msgItem.text = '<img src="' + data.image + '"><dt>' + _people + '</dt>';
 		return msgItem;
 
 	}

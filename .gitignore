@@ -8,7 +8,7 @@ npm-debug.*
 # sass
 .sass-cache
 
-# upload
+# upload images
 public/upload/*
 
 # system

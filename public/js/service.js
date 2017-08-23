@@ -23,7 +23,7 @@ module.exports = {
 	 */
 	getLastestMsg: function() {
 
-		if (!helper.getItem('id')) {
+		if (!helper.getItem('chatId')) {
 			return new Promise(function(resolve, reject) {
 				resolve('No history before.');
 			});

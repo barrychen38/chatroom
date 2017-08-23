@@ -1,33 +1,23 @@
 let gulp = require('gulp');
-let $ = require('gulp-load-plugins')();
-let pump = require('pump');
+let uglify = require('gulp-uglify');
 let browserify = require('browserify');
-let vinylSourceStream = require('vinyl-source-stream');
+let source = require('vinyl-source-stream');
+let buffer = require('vinyl-buffer');
+let pump = require('pump');
 
-gulp.task('dev', () => {
+gulp.task('default', () => {
 
 	pump([
 		browserify({
 			entries: 'public/js/main.js',
-			debug: true
+			debug: false
 		}).bundle(),
-		vinylSourceStream('bundle.js'),
+		source('bundle.js'),
+		buffer(),
+		// uglify(),
 		gulp.dest('public/dist/js')
 	]);
 
 });
 
-gulp.task('build', () => {
-
-	pump([
-		$.concat('app.js'),
-		$.uglify(),
-		$.rename({
-			suffix: '.min'
-		}),
-		gulp.dest('public/dist/js')
-	]);
-
-});
-
-gulp.watch('public/js/*', ['dev']);
+gulp.watch('public/js/*.js', ['default']);

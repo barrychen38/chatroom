@@ -39,11 +39,11 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('user join', (data) => {
-		socket.user = data.username;
-		socket.id = data.id ? data.id : uuid.v1({msec: new Date().getTime()});
+		socket.user = data.user;
+		socket.chatId = data.chatId ? data.chatId : uuid.v1({msec: new Date().getTime()});
 		io.emit('user join', {
-			username: data.username,
-			id: socket.id
+			user: data.user,
+			chatId: socket.chatId
 		});
 	});
 

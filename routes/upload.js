@@ -21,9 +21,9 @@ router.post('/upload', (req, res) => {
 
 	fs.writeFile('public/upload/' + fileName, new Buffer(file, 'base64'), (err) => {
 		if (err) {
-			data = JSON.stringify({readyState: 0, message: 'Upload failed.'});
+			data = JSON.stringify({readyState: 0, error_message: 'Upload failed.'});
 		} else {
-			data = JSON.stringify({readyState: 1, imgUrl: '/upload/' + fileName});
+			data = JSON.stringify({readyState: 1, image: '/upload/' + fileName});
 		}
 		res.send(data);
 	});
