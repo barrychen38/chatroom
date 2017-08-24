@@ -50,8 +50,11 @@ router.get(URL, (req, res) => {
 /**
  * Save the last 10 message
  */
-router.save = () => {
-
+router.save = (msgItems) => {
+	msgItems.forEach((item) => {
+		let message = new Message(item);
+		message.save();
+	});
 }
 
 module.exports = router;

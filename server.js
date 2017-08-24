@@ -2,7 +2,6 @@
 let express = require('express');
 let http = require('http');
 let bodyParser = require('body-parser');
-let mongoose = require('mongoose');
 let uuid = require('uuid');
 
 // Create server for Socket.io
@@ -21,6 +20,10 @@ let msgCollection = [];
 let personCount = 0
 io.on('connection', (socket) => {
 	personCount++;
+
+	if (personCount === 1) {
+		msgCollection.length = 0;
+	}
 
 	socket.user = null;
 
@@ -48,13 +51,25 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('send image', (data) => {
+
 		io.emit('send image', data);
+
+		let text = data.image;
+		let dataCopy = Object.assign({}, data);
+		delete dataCopy.image;
+		dataCopy.text = text;
+
+		msgCollection.push(data);
+		if (msgCollection.length === 100) {
+			msgCollection.splice(0, 90);
+		}
+
 	});
 
 	socket.on('disconnect', () => {
 		personCount--;
-		if (personCount === 0) {
-
+		if (!personCount) {
+			message.save(msgCollection);
 		}
 		if (socket.user !== null) {
 			io.emit('offline', {

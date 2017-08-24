@@ -10,6 +10,7 @@ npm-debug.*
 
 # upload images
 public/upload/*
+!public/upload/.gitkeep
 
 # system
 *.DS_Store
