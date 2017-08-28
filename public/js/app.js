@@ -65,7 +65,7 @@ module.exports = function(Vue, io) {
 
 			var _this = this;
 			_this.isGettingMsg = true;
-			service.getLastestMsg()
+			service.getLatestMsg()
 				.then(function(response) {
 					if (response.data) {
 						var msgLength = response.data.length;

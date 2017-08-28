@@ -21,7 +21,7 @@ module.exports = {
 	 *
 	 * @return Promise
 	 */
-	getLastestMsg: function() {
+	getLatestMsg: function() {
 
 		if (!helper.getItem('chatId')) {
 			return new Promise(function(resolve, reject) {
