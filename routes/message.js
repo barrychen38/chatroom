@@ -2,7 +2,6 @@ let express = require('express');
 let mongoose = require('../mongo/db');
 
 let router = express.Router();
-let URL = '/messages';
 
 router.use((req, res, next) => {
 
@@ -22,7 +21,7 @@ let Message = mongoose.model('Message', schema);
 /**
  * Get the last 10 messages
  */
-router.get(URL, (req, res) => {
+router.get('/messages', (req, res) => {
 
 	Message
 		.find()

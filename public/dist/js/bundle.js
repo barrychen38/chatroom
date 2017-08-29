@@ -9020,6 +9020,7 @@ module.exports = function(Vue, io) {
 			chatId,
 			user,
 			yourNickname,
+			hasHistoryMsg = false,
 			MAX_WINDOW_HEIGHT = 380;
 
 	var reader = new FileReader();
@@ -9069,15 +9070,16 @@ module.exports = function(Vue, io) {
 
 			var _this = this;
 			_this.isGettingMsg = true;
-			service.getLastestMsg()
+			service.getLatestMsg()
 				.then(function(response) {
-					if (response.data) {
+					if (response.data.length) {
+						hasHistoryMsg = true;
 						var msgLength = response.data.length;
 						for (var i = 0; i < msgLength; i++) {
 							showMsg(response.data[i], false);
 						}
-						_this.isGettingMsg = false;
 					}
+					_this.isGettingMsg = false;
 				})
 				.catch(function(error) {
 					_this.isGettingMsg = false;
@@ -9263,14 +9265,7 @@ module.exports = function(Vue, io) {
 	// User join
 	socket.on('user join', function(data) {
 
-		helper.setItem('chatId', data.chatId);
-		helper.setItem('user', data.user);
-
-		// Set the new info of you
-		chatId = data.chatId;
-		user = data.user;
-
-		if (Chat.contents.length) {
+		if (hasHistoryMsg) {
 			Chat.contents.push(
 				{
 					isJoinShow: true,
@@ -9291,6 +9286,15 @@ module.exports = function(Vue, io) {
 			Chat.scrollInner();
 		});
 
+	});
+
+	// Set chatId
+	socket.on('set uuid', function(data) {
+		if (!helper.getItem('chatId')) {
+			helper.setItem('chatId', data.chatId);
+		}
+		helper.setItem('user', data.user);
+		user = data.user;
 	});
 
 	// Offline
@@ -9402,7 +9406,7 @@ module.exports = function(Vue, io) {
 
 },{"./emoji":73,"./helper":74,"./service":76}],73:[function(require,module,exports){
 /**
- * Define emoji className and showName
+ * Define emoji classNames and showNames
  */
 module.exports = {
 	names: [
@@ -9592,11 +9596,11 @@ module.exports = {
 	 *
 	 * @return Promise
 	 */
-	getLastestMsg: function() {
+	getLatestMsg: function() {
 
 		if (!helper.getItem('chatId')) {
 			return new Promise(function(resolve, reject) {
-				resolve('No history before.');
+				resolve({ data: [] });
 			});
 		}
 

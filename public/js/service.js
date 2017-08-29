@@ -25,7 +25,7 @@ module.exports = {
 
 		if (!helper.getItem('chatId')) {
 			return new Promise(function(resolve, reject) {
-				resolve('No history before.');
+				resolve({ data: [] });
 			});
 		}
 
