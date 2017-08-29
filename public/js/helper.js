@@ -6,20 +6,20 @@ module.exports = {
 	 * // - getItem
 	 * // - removeItem
 	 */
-	setItem: (key, value) => {
+	setItem: function(key, value) {
 		value = JSON.stringify(value);
 		window.localStorage.setItem(key, value);
 	},
 
-	getItem: (key) => {
+	getItem: function(key) {
 		let value = window.localStorage.getItem(key);
 		if (value) {
-			return JSON.parse(value)
+			return JSON.parse(value);
 		}
 		return '';
 	},
 
-	removeItem: (key) => {
+	removeItem: function(key) {
 		window.localStorage.removeItem(key);
 	}
 

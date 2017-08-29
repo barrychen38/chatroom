@@ -1,5 +1,5 @@
 /**
- * Define emoji className and showName
+ * Define emoji classNames and showNames
  */
 module.exports = {
 	names: [
@@ -125,5 +125,5 @@ module.exports = {
 		'trollface',
 		'dog',
 		'broken_heart'
-	],
+	]
 }

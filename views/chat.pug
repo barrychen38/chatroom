@@ -3,33 +3,32 @@ html(lang="en")
 	head
 		meta(charset="UTF-8")
 		meta(name="viewport", content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no")
-		title AlaChat
+		title GoChat
 		link(rel="icon", href="/faviocn.ico")
-		link(rel="stylesheet", href="/dist/main.css")
+		link(rel="stylesheet", href="/dist/css/main.css")
 	body
-
 		#app(v-cloak @click="showEmojisTable")
-			.enter_nickname(v-show="isNicknameShow")
+			.enter-nickname(v-show="isNicknameShow")
 				.form
 					input.nickname(type="text", name="nickname", maxlength="20", autofocus, placeholder="Enter your nickname" v-model="nickname", @keydown.13.prevent="confirmNickname")
 					br
 					input.confirm.box-shadow(type="button", name="confirm", value="Go Chat", @click.prevent="confirmNickname")
-					p.warn.tc(v-show="isWarnShow") {{confirmResult}}
+					p.warn(v-show="isWarnShow") {{confirmResult}}
 			.container
-				.wrapper.box-shadow.bc
-					.whoiam.bc
-						span.name.fl {{nickname}}
+				.wrapper.box-shadow.block-center
+					.whoiam.bloack-center
+						span.name.float-left {{nickname}}
 						transition(name="fade")
 							span.info(v-show="isInfoShow") {{info}}
-						b.p_count.p_text.fr {{people}}
-						span.p_text.fr Online:&nbsp;&nbsp;
-					.messages.bc
+						b.header-text.float-right {{peopleCount}}
+						span.header-text.float-right Online:&nbsp;&nbsp;
+					.messages.block-center(:class="{ load: isGettingMsg }")
 						.inner
 							//- transition(name="fade")
 							.scroller
 								p.msg.clearfix(v-for="item in contents")
-									span.join(v-if="item.isJoinShow") {{item.nickname}}
-									span(v-else, v-html="item.msg", :class="[item.isYou ? rightMsgClass : leftMsgClass]")
+									span.join(v-if="item.isJoinShow") {{item.text}}
+									span(v-else, v-html="item.text", :class="[item.isYou ? rightMsgClass : leftMsgClass]")
 					.emoji
 						i.em.all(@click.stop="showEmojisTable")
 						//- i.em.shake_btn(@click.prevent="shakeWindow")
@@ -37,8 +36,8 @@ html(lang="en")
 							input.file(type="file", name="file", accept="images/*", @click="sendImage")
 						.table.clearfix(v-show="isEmojisShow")
 							i(v-for="(emoji, index) in emojis", :class="emoji.className", :title="emoji.title", @click.prevent="chooseEmoji(index)")
-					.text.bc
+					.text.block-center
 						textarea.input(name="input", placeholder="Send Message", autofocus, v-model="typeMessage", @keydown.13.prevent="sendMessage")
 						//- input.send(type="button", name="send", value='SEND', @click.prevent="sendMessage")
 				p.tip Enter to send, Ctrl + Enter to wrap.
-		script(type="text/javascript" src="/dist/js/bundle.js")
+		script(type="text/javascript", aysnc, src="/dist/js/bundle.js")

@@ -4,9 +4,14 @@ let fs = require('fs');
 
 let router = express.Router();
 
-router.post('/upload', (req, res) => {
+router.use((req, res, next) => {
 
 	res.setHeader('Content-Type', 'application/json');
+	next();
+
+});
+
+router.post('/upload', (req, res) => {
 
 	let body = req.body,
 		data = null;
@@ -16,11 +21,11 @@ router.post('/upload', (req, res) => {
 
 	fs.writeFile('public/upload/' + fileName, new Buffer(file, 'base64'), (err) => {
 		if (err) {
-			data = JSON.stringify({readyState: 0, message: 'Upload failed.'});
+			data = {readyState: 0, error_message: 'Upload failed.'};
 		} else {
-			data = JSON.stringify({readyState: 1, imgUrl: '/upload/' + fileName});
+			data = {readyState: 1, image: '/upload/' + fileName};
 		}
-		res.send(data);
+		res.json(data);
 	});
 
 });
