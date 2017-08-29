@@ -1,35 +1,23 @@
-const gulp = require('gulp');
-const plugins = require('gulp-load-plugins')();
-const pump = require('pump');
+let gulp = require('gulp');
+let uglify = require('gulp-uglify');
+let browserify = require('browserify');
+let source = require('vinyl-source-stream');
+let buffer = require('vinyl-buffer');
+let pump = require('pump');
 
-const dev = ['public/vendor/socket.io.js', 'public/vendor/uuid.core.js', 'public/vendor/vue.min.js', 'public/vendor/axios.min.js', 'public/vendor/smooth-scroll.min.js'];
+gulp.task('default', () => {
 
-const build = ['public/vendor/socket.io.js', 'public/vendor/uuid.core.js', 'public/vendor/vue.min.js', 'public/vendor/axios.min.js', 'public/vendor/smooth-scroll.min.js', 'public/js/chat.js'];
-
-gulp.task('dev', () => {
-	
 	pump([
-		gulp.src(dev),
-		plugins.concat('lib.js'),
-		plugins.uglify(),
-		plugins.rename({
-			suffix: '.min'
-		}),
+		browserify({
+			entries: 'public/js/main.js',
+			debug: false
+		}).bundle(),
+		source('bundle.js'),
+		buffer(),
+		// uglify(),
 		gulp.dest('public/dist/js')
 	]);
-	
+
 });
 
-gulp.task('build', () => {
-	
-	pump([
-		gulp.src(build),
-		plugins.concat('app.js'),
-		plugins.uglify(),
-		plugins.rename({
-			suffix: '.min'
-		}),
-		gulp.dest('public/dist/js')
-	]);
-	
-});
+gulp.watch('public/js/*.js', ['default']);

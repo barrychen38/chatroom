@@ -1,4 +1,16 @@
-/.sass-cache
-/node_modules
-/bower_components
+# editor
+.vscode
+
+# npm
+node_modules
 npm-debug.*
+
+# sass
+.sass-cache
+
+# upload images
+public/upload/*
+!public/upload/.gitkeep
+
+# system
+*.DS_Store
