@@ -12,7 +12,7 @@ module.exports = {
 	},
 
 	getItem: function(key) {
-		let value = window.localStorage.getItem(key);
+		var value = window.localStorage.getItem(key);
 		if (value) {
 			return JSON.parse(value);
 		}

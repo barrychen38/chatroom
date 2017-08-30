@@ -1,7 +1,7 @@
-let express = require('express');
-let mongoose = require('../mongo/db');
+const express = require('express');
+const mongoose = require('../mongo/db');
 
-let router = express.Router();
+const router = express.Router();
 
 router.use((req, res, next) => {
 
@@ -10,13 +10,13 @@ router.use((req, res, next) => {
 
 });
 
-let schema = new mongoose.Schema({
+const schema = new mongoose.Schema({
 	chatId: String,
 	user: String,
 	text: String
 });
 
-let Message = mongoose.model('Message', schema);
+const Message = mongoose.model('Message', schema);
 
 /**
  * Get the last 10 messages
@@ -44,7 +44,7 @@ router.save = (msgItems) => {
 			return err;
 		}
 		msgItems.forEach((item) => {
-			let message = new Message(item);
+			const message = new Message(item);
 			message.save();
 		});
 	});

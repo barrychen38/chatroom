@@ -1,27 +1,27 @@
 // Import from npm package
-let express = require('express');
-let http = require('http');
-let path = require('path');
-let bodyParser = require('body-parser');
-let uuid = require('uuid');
+const express = require('express');
+const http = require('http');
+const path = require('path');
+const bodyParser = require('body-parser');
+const uuid = require('uuid');
 
 // Create server for Socket.io
-let app = express();
-let server = http.createServer(app);
-let io = require('socket.io')(server);
+const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 
 // Routes
-let chat = require('./routes/chat');
-let upload = require('./routes/upload');
-let message = require('./routes/message');
+const chat = require('./routes/chat');
+const upload = require('./routes/upload');
+const message = require('./routes/message');
 
-let msgCollection = [];
+const msgCollection = [];
 
-/*-------- Socket.io Chat --------*/
+/* -------- Socket.io Chat -------- */
 let personCount = 0
 io.on('connection', (socket) => {
 
-	personCount++;
+	personCount += 1;
 
 	if (personCount === 1) {
 		msgCollection.length = 0;
@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
 
 		let text = data.image;
 		let dataCopy = Object.assign({}, data);
-		delete dataCopy.image;
+		Reflect.deleteProperty(dataCopy, 'image');
 		dataCopy.text = text;
 
 		msgCollection.push(data);
@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('disconnect', () => {
-		personCount--;
+		personCount -= 1;
 		if (!personCount) {
 			message.save(msgCollection);
 		}
@@ -91,8 +91,8 @@ io.on('connection', (socket) => {
 	});
 });
 
-/*-------- Express App --------*/
-let PORT = process.env.PORT || 2261;
+/* -------- Express App -------- */
+const PORT = process.env.PORT || 2261;
 
 app.all('*', (req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*');
@@ -105,8 +105,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 // Use middlewares
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json({ limit: 1024 * 1024 * 2 }));
-app.use(bodyParser.urlencoded({ extended: true, limit: 1024 * 1024 * 2 }));
+app.use(bodyParser.json({limit: 1024 * 1024 * 2}));
+app.use(bodyParser.urlencoded({
+	extended: true,
+	limit: 1024 * 1024 * 2
+}));
 app.use(chat);
 app.use(upload);
 app.use(message);

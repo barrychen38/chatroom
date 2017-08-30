@@ -6,11 +6,13 @@ module.exports = function(Vue, io) {
 
 	// Check notification
 	if ('Notification' in window) {
-		var permission = window.Notification.requestPermission(),
-				checkPermission = window.Notification.permission;
+		window.Notification.requestPermission();
+		var checkPermission = window.Notification.permission;
 	}
 
 	var emojiLength = emoji.names.length;
+
+	var a = [1, 2, 3, 4];
 
 	var socket = io(),
 			chatId,
@@ -79,7 +81,7 @@ module.exports = function(Vue, io) {
 				})
 				.catch(function(error) {
 					_this.isGettingMsg = false;
-					console.error(error.message);
+					throw new Error(error.message);
 				})
 		},
 
@@ -144,10 +146,10 @@ module.exports = function(Vue, io) {
 				var _message = msg,
 						emojis = _message.match(/\[[a-z_]+\]/g);
 				if (_message.indexOf('<') !== -1) {
-					_message = _message.replace(/\</g, '&lt;');
+					_message = _message.replace(/</g, '&lt;');
 				}
 				if (_message.indexOf('>') !== -1) {
-					_message = _message.replace(/\>/g, '&gt;');
+					_message = _message.replace(/>/g, '&gt;');
 				}
 				if (_message.indexOf('\n') !== -1 && _message.match(/\n/g).length === _message.length) {
 					_message = _message.replace(/\n/g, '');
@@ -194,18 +196,19 @@ module.exports = function(Vue, io) {
 			sendImage: function(event) {
 				var _this = this,
 						_file,
+						_val,
 						_target = event.target;
 				_target.onchange = function() {
+					_val = this.value;
 					_file = this.files[0];
-					val = this.value;
 					if (!_file.type.match(/(jpg|jpeg|png|gif)/g)) {
 						_this.showInfo('Please choose an Image.');
-						val = '';
+						_val = '';
 						return;
 					}
 					if (_file.size > 1024 * 1024 * 2) {
 						_this.showInfo('Please choose an image less than 2MB.');
-						val = '';
+						_val = '';
 						return;
 					}
 					_target.setAttribute('disabled', 'disabled');
@@ -215,7 +218,7 @@ module.exports = function(Vue, io) {
 							.then(function(response) {
 								if (response.data.readyState === 1) {
 									_target.removeAttribute('disabled');
-									val = '';
+									_val = '';
 									socket.emit('send image', {
 										image: response.data.image,
 										user: yourNickname,
@@ -224,7 +227,7 @@ module.exports = function(Vue, io) {
 								}
 							})
 							.catch(function(err) {
-								console.error(err.message);
+								throw new Error(err.message);
 							});
 					}
 				}
