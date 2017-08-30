@@ -1,9 +1,9 @@
-let gulp = require('gulp');
-let uglify = require('gulp-uglify');
-let browserify = require('browserify');
-let source = require('vinyl-source-stream');
-let buffer = require('vinyl-buffer');
-let pump = require('pump');
+const gulp = require('gulp');
+const uglify = require('gulp-uglify');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const pump = require('pump');
 
 gulp.task('default', () => {
 
@@ -14,6 +14,7 @@ gulp.task('default', () => {
 		}).bundle(),
 		source('bundle.js'),
 		buffer(),
+		// Uglify function
 		// uglify(),
 		gulp.dest('public/dist/js')
 	]);

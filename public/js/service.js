@@ -24,12 +24,12 @@ module.exports = {
 	getLatestMsg: function() {
 
 		if (!helper.getItem('chatId')) {
-			return new Promise(function(resolve, reject) {
-				resolve({ data: [] });
+			return new Promise(function(resolve) {
+				resolve({data: []});
 			});
 		}
 
-		let url = '/messages';
+		var url = '/messages';
 		return axios.get(url);
 
 	}
