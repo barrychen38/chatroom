@@ -1,8 +1,9 @@
-let express = require('express');
-let uuid = require('uuid');
-let fs = require('fs');
+const express = require('express');
+const uuid = require('uuid');
+const fs = require('fs');
+const Buffer = require('buffer').Buffer;
 
-let router = express.Router();
+const router = express.Router();
 
 router.use((req, res, next) => {
 
@@ -21,9 +22,15 @@ router.post('/upload', (req, res) => {
 
 	fs.writeFile('public/upload/' + fileName, new Buffer(file, 'base64'), (err) => {
 		if (err) {
-			data = {readyState: 0, error_message: 'Upload failed.'};
+			data = {
+				readyState: 0,
+				error_message: 'Upload failed.'
+			};
 		} else {
-			data = {readyState: 1, image: '/upload/' + fileName};
+			data = {
+				readyState: 1,
+				image: '/upload/' + fileName
+			};
 		}
 		res.json(data);
 	});
