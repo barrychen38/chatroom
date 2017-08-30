@@ -4,7 +4,8 @@
   "description": "A chat room based on Socket.io",
   "main": "server.js",
   "scripts": {
-    "dev": "gulp"
+		"dev": "gulp",
+		"test": "gulp build"
   },
   "keywords": [
     "nodejs",

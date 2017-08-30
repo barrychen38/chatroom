@@ -21,4 +21,17 @@ gulp.task('default', () => {
 
 });
 
-gulp.watch('public/js/*.js', ['default']);
+gulp.task('build', () => {
+	pump([
+		browserify({
+			entries: 'public/js/main.js',
+			debug: false
+		}).bundle(),
+		source('bundle.js'),
+		buffer(),
+		gulp.dest('public/dist/js')
+	]);
+});
+
+// Watch files to continue run
+// gulp.watch('public/js/*.js', ['default']);
