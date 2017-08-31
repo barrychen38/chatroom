@@ -44,7 +44,7 @@ module.exports = function(Vue, io) {
 
 		watch: {
 			nickname: function() {
-				this.checkNickname();
+				this.checkNickname(this.nickname);
 			}
 		},
 
@@ -97,9 +97,9 @@ module.exports = function(Vue, io) {
 
 		methods: {
 
-			checkNickname: function() {
-				var _len = this.nickname.length,
-						_check = this.nickname.match(/\s/g);
+			checkNickname: function(nickname) {
+				var _len = nickname.length,
+						_check = nickname.match(/\s/g);
 				if (!_len) {
 					this.confirmResult = 'Please enter a nickname';
 					return false;
@@ -112,9 +112,9 @@ module.exports = function(Vue, io) {
 				return true;
 			},
 
-			confirmNickname: function() {
-				if (this.checkNickname()) {
-					yourNickname = this.nickname;
+			confirmNickname: function(nickname) {
+				if (this.checkNickname(nickname)) {
+					yourNickname = nickname;
 					this.isNicknameShow = false;
 					socket.emit('user join', {
 						user: yourNickname,
@@ -134,12 +134,12 @@ module.exports = function(Vue, io) {
 				document.querySelector('.input').focus();
 			},
 
-			showInfo: function(info_msg) {
+			showInfo: function(infoMsg) {
 				var _this = this,
 						showTimer;
 				clearTimeout(showTimer);
 				_this.isInfoShow = true;
-				_this.info = info_msg;
+				_this.info = infoMsg;
 				showTimer = setTimeout(function() {
 					_this.isInfoShow = false;
 					// _this.info = '';
