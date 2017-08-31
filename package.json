@@ -4,8 +4,8 @@
   "description": "A chat room based on Socket.io",
   "main": "server.js",
   "scripts": {
-    "dev": "gulp dev",
-    "test": "./node_modules/.bin/jasmine-node spec"
+		"dev": "gulp",
+		"test": "gulp build"
   },
   "keywords": [
     "nodejs",
@@ -30,11 +30,8 @@
     "browserify": "^14.4.0",
     "eslint": "^4.5.0",
     "gulp": "^3.9.1",
-    "gulp-compass": "^2.1.0",
-    "gulp-plumber": "^1.1.0",
     "gulp-sourcemaps": "^2.6.1",
     "gulp-uglify": "^2.0.0",
-    "jasmine-node": "^1.14.5",
     "pump": "^1.0.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"

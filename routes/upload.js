@@ -20,7 +20,7 @@ router.post('/upload', (req, res) => {
 		file = body.file.substr(22);
 	let fileName = `${uuid.v1({msec: new Date().getTime()})}.${ext}`;
 
-	fs.writeFile(`public/upload/${fileName}`, new Buffer(file, 'base64'), (err) => {
+	fs.writeFile('public/upload/' + fileName, new Buffer(file, 'base64'), (err) => {
 		if (err) {
 			data = {
 				readyState: 0,
@@ -29,7 +29,7 @@ router.post('/upload', (req, res) => {
 		} else {
 			data = {
 				readyState: 1,
-				image: `/upload/${fileName}`
+				image: '/upload/' + fileName
 			};
 		}
 		res.json(data);

@@ -10,7 +10,7 @@ html(lang="en")
 		#app(v-cloak @click="showEmojisTable")
 			.enter-nickname(v-show="isNicknameShow")
 				.form
-					input.nickname(type="text", name="nickname", maxlength="20", autofocus, placeholder="Enter your nickname" v-model="nickname", @keydown.13.prevent="confirmNickname(nickname)")
+					input.nickname(type="text", name="nickname", maxlength="20", autofocus, placeholder="Enter your nickname" v-model="nickname", @keydown.13.prevent="confirmNickname")
 					br
 					input.confirm.box-shadow(type="button", name="confirm", value="Go Chat", @click.prevent="confirmNickname")
 					p.warn(v-show="isWarnShow") {{confirmResult}}
