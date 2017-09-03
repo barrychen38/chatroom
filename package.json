@@ -4,6 +4,7 @@
   "description": "A chat room based on Socket.io",
   "main": "server.js",
   "scripts": {
+    "serve": "node server.js",
     "dev": "gulp dev",
     "test": "./node_modules/.bin/jasmine-node spec"
   },
