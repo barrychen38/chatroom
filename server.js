@@ -33,10 +33,10 @@ io.on('connection', (socket) => {
 		io.emit('online', personCount);
 	});
 
-	socket.on('user join', (data) => {
+	socket.on('user join', (userInfo) => {
 
-		socket.user = data.user;
-		socket.chatId = data.chatId ? data.chatId : uuid.v1({msec: new Date().getTime()});
+		socket.user = userInfo.user;
+		socket.chatId = userInfo.chatId ? userInfo.chatId : uuid.v1({msec: new Date().getTime()});
 		// Broadcast your join message
 		socket.broadcast.emit('user join', {
 			user: socket.user
@@ -49,28 +49,28 @@ io.on('connection', (socket) => {
 
 	});
 
-	socket.on('chat', (data) => {
+	socket.on('chat', (msgItem) => {
 		// Ensure your message
-		data.chatId = socket.chatId;
-		io.emit('chat', data);
+		msgItem.chatId = socket.chatId;
+		io.emit('chat', msgItem);
 
-		msgCollection.push(data);
+		msgCollection.push(msgItem);
 		if (msgCollection.length === 100) {
 			msgCollection.splice(0, 90);
 		}
 
 	});
 
-	socket.on('send image', (data) => {
+	socket.on('send image', (imgItem) => {
 
-		io.emit('send image', data);
+		io.emit('send image', imgItem);
 
-		let text = data.image;
-		let dataCopy = Object.assign({}, data);
+		let text = imgItem.image;
+		let dataCopy = Object.assign({}, imgItem);
 		Reflect.deleteProperty(dataCopy, 'image');
 		dataCopy.text = text;
 
-		msgCollection.push(data);
+		msgCollection.push(imgItem);
 		if (msgCollection.length === 100) {
 			msgCollection.splice(0, 90);
 		}
@@ -83,9 +83,9 @@ io.on('connection', (socket) => {
 			message.save(msgCollection);
 		}
 		if (socket.user !== null) {
-			io.emit('offline', {
+			socket.broadcast.emit('offline', {
 				count: personCount,
-				username: socket.user
+				user: socket.user
 			});
 		}
 	});
