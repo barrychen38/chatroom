@@ -9002,11 +9002,16 @@ yeast.decode = decode;
 module.exports = yeast;
 
 },{}],72:[function(require,module,exports){
+var Vue = require('../vendor/vue');
+var io = require('socket.io-client');
+
 var emoji = require('./emoji');
 var helper = require('./helper');
 var service = require('./service');
 
-module.exports = function(Vue, io) {
+module.exports = function() {
+
+	Vue.config.devtools = false;
 
 	// Check notification
 	if ('Notification' in window) {
@@ -9015,8 +9020,6 @@ module.exports = function(Vue, io) {
 	}
 
 	var emojiLength = emoji.names.length;
-
-	var a = [1, 2, 3, 4];
 
 	var socket = io(),
 			chatId,
@@ -9050,7 +9053,7 @@ module.exports = function(Vue, io) {
 
 		watch: {
 			nickname: function() {
-				this.checkNickname();
+				this.checkNickname(this.nickname);
 			}
 		},
 
@@ -9081,6 +9084,18 @@ module.exports = function(Vue, io) {
 							showMsg(response.data[i], false);
 						}
 					}
+
+					// If history message, show the tip
+					if (hasHistoryMsg) {
+						_this.contents.push(
+							{
+								isJoinShow: true,
+								text: '-------- History Message --------'
+							}
+						);
+						hasHistoryMsg = false;
+					}
+
 					_this.isGettingMsg = false;
 				})
 				.catch(function(error) {
@@ -9091,9 +9106,9 @@ module.exports = function(Vue, io) {
 
 		methods: {
 
-			checkNickname: function() {
-				var _len = this.nickname.length,
-						_check = this.nickname.match(/\s/g);
+			checkNickname: function(nickname) {
+				var _len = nickname.length,
+						_check = nickname.match(/\s/g);
 				if (!_len) {
 					this.confirmResult = 'Please enter a nickname';
 					return false;
@@ -9106,9 +9121,9 @@ module.exports = function(Vue, io) {
 				return true;
 			},
 
-			confirmNickname: function() {
-				if (this.checkNickname()) {
-					yourNickname = this.nickname;
+			confirmNickname: function(nickname) {
+				if (this.checkNickname(nickname)) {
+					yourNickname = nickname;
 					this.isNicknameShow = false;
 					socket.emit('user join', {
 						user: yourNickname,
@@ -9128,12 +9143,12 @@ module.exports = function(Vue, io) {
 				document.querySelector('.input').focus();
 			},
 
-			showInfo: function(info_msg) {
+			showInfo: function(infoMsg) {
 				var _this = this,
 						showTimer;
 				clearTimeout(showTimer);
 				_this.isInfoShow = true;
-				_this.info = info_msg;
+				_this.info = infoMsg;
 				showTimer = setTimeout(function() {
 					_this.isInfoShow = false;
 					// _this.info = '';
@@ -9268,21 +9283,9 @@ module.exports = function(Vue, io) {
 	// User join
 	socket.on('user join', function(data) {
 
-		if (hasHistoryMsg) {
-			Chat.contents.push(
-				{
-					isJoinShow: true,
-					text: 'History Message.'
-				}, {
-					isJoinShow: true,
-					text: '--------------------------------'
-				}
-			);
-		}
-
 		Chat.contents.push({
 			isJoinShow: true,
-			text: data.user + ' join the group chat.'
+			text: data.user + ' join the room.'
 		});
 
 		Vue.nextTick(function() {
@@ -9292,21 +9295,22 @@ module.exports = function(Vue, io) {
 	});
 
 	// Set chatId
-	socket.on('set uuid', function(data) {
+	socket.on('set uuid', function(userInfo) {
 		if (!helper.getItem('chatId')) {
-			helper.setItem('chatId', data.chatId);
+			helper.setItem('chatId', userInfo.chatId);
+			chatId = userInfo.chatId;
 		}
-		helper.setItem('user', data.user);
-		user = data.user;
+		helper.setItem('user', userInfo.user);
+		user = userInfo.user;
 	});
 
 	// Offline
-	socket.on('offline', function(people) {
+	socket.on('offline', function(person) {
 
-		Chat.people = people.count;
+		Chat.people = person.count;
 		Chat.contents.push({
 			isJoinShow: true,
-			nickname: people.user + ' leave the group chat.'
+			text: person.user + ' leave the room.'
 		});
 
 		Vue.nextTick(function() {
@@ -9316,28 +9320,28 @@ module.exports = function(Vue, io) {
 	});
 
 	// Chat
-	socket.on('chat', function(data) {
+	socket.on('chat', function(msgItem) {
 
-		showMsg(data);
+		showMsg(msgItem);
 		Chat.typeMessage = '';
 		Chat.isEmojisShow = false;
 
 	});
 
 	// Send image
-	socket.on('send image', function(data) {
+	socket.on('send image', function(imgItem) {
 
 		Chat.isJoinShow = false;
 
-		Chat.preloadImage(data.image, function() {
-			showMsg(data);
+		Chat.preloadImage(imgItem.image, function() {
+			showMsg(imgItem);
 		});
 
 	});
 
-	function showMsg(data, showAlert) {
+	function showMsg(item, showAlert) {
 
-		var msgItem = checkUser(data, showAlert);
+		var msgItem = checkUser(item, showAlert);
 
 		Chat.contents.push(msgItem);
 		Vue.nextTick(function() {
@@ -9348,15 +9352,15 @@ module.exports = function(Vue, io) {
 	/**
 	 * Check user
 	 */
-	function checkUser(data, showAlert) {
+	function checkUser(item, showAlert) {
 
 		// Default is true
 		if (typeof showAlert === 'undefined') {
 			showAlert = true;
 		}
 
-		var _people = data.user,
-				_id =  data.chatId;
+		var _people = item.user,
+				_id =  item.chatId;
 
 		var msgItem = {
 			isJoinShow: false,
@@ -9369,14 +9373,14 @@ module.exports = function(Vue, io) {
 		if (user === _people && chatId === _id) {
 
 			// Send message
-			if (data.text) {
-				transformText = Chat.checkMessage(data.text);
+			if (item.text) {
+				transformText = Chat.checkMessage(item.text);
 				msgItem.text = transformText + '<dt>Me</dt>';
 				return msgItem;
 			}
 
 			// Send image
-			msgItem.text = '<img src="' + data.image + '"><dt>Me</dt>';
+			msgItem.text = '<img src="' + item.image + '"><dt>Me</dt>';
 			return msgItem;
 
 		}
@@ -9384,13 +9388,13 @@ module.exports = function(Vue, io) {
 		// It is not you
 		msgItem.isYou = false;
 
-		if (data.text) {
+		if (item.text) {
 
 			// Send message
 			if (showAlert) {
-				Chat.alertMessage(_people, data.text);
+				Chat.alertMessage(_people, item.text);
 			}
-			transformText = Chat.checkMessage(data.text);
+			transformText = Chat.checkMessage(item.text);
 			msgItem.text = transformText + '<dt>' + _people + '</dt>';
 			return msgItem;
 
@@ -9400,14 +9404,17 @@ module.exports = function(Vue, io) {
 		if (showAlert) {
 			Chat.alertMessage(_people, 'Send a photo in Group Chat.');
 		}
-		msgItem.text = '<img src="' + data.image + '"><dt>' + _people + '</dt>';
+		msgItem.text = '<img src="' + item.image + '"><dt>' + _people + '</dt>';
 		return msgItem;
 
 	}
 
+	// For test
+	return Chat;
+
 }
 
-},{"./emoji":73,"./helper":74,"./service":76}],73:[function(require,module,exports){
+},{"../vendor/vue":77,"./emoji":73,"./helper":74,"./service":76,"socket.io-client":61}],73:[function(require,module,exports){
 /**
  * Define emoji classNames and showNames
  */
@@ -9567,16 +9574,11 @@ module.exports = {
 }
 
 },{}],75:[function(require,module,exports){
-var Vue = require('../vendor/vue');
-var io = require('socket.io-client');
-
-Vue.config.devtools = false;
-
 // Notification in browser
 // require('./notify')();
-require('./app')(Vue, io);
+require('./app')();
 
-},{"../vendor/vue":77,"./app":72,"socket.io-client":61}],76:[function(require,module,exports){
+},{"./app":72}],76:[function(require,module,exports){
 var axios = require('axios');
 var helper = require('./helper');
 var Promise = require('es6-promise').Promise;
