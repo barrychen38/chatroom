@@ -28,7 +28,7 @@ router.get('/messages', (req, res) => {
 		.select('-__v -_id')
 		.exec((err, message) => {
 			if (err) {
-				return err;
+				throw new Error(err);
 			}
 			res.json(message);
 		});
@@ -41,7 +41,7 @@ router.get('/messages', (req, res) => {
 router.save = (msgItems) => {
 	Message.remove({}, (err) => {
 		if (err) {
-			return err;
+			throw new Error(err);
 		}
 		msgItems.forEach((item) => {
 			const message = new Message(item);
