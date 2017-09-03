@@ -9016,8 +9016,6 @@ module.exports = function(Vue, io) {
 
 	var emojiLength = emoji.names.length;
 
-	var a = [1, 2, 3, 4];
-
 	var socket = io(),
 			chatId,
 			user,
@@ -9295,6 +9293,7 @@ module.exports = function(Vue, io) {
 	socket.on('set uuid', function(data) {
 		if (!helper.getItem('chatId')) {
 			helper.setItem('chatId', data.chatId);
+			chatId = data.chatId;
 		}
 		helper.setItem('user', data.user);
 		user = data.user;
