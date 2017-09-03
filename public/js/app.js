@@ -1,8 +1,13 @@
+var Vue = require('../vendor/vue');
+var io = require('socket.io-client');
+
 var emoji = require('./emoji');
 var helper = require('./helper');
 var service = require('./service');
 
-module.exports = function(Vue, io) {
+module.exports = function() {
+
+	Vue.config.devtools = false;
 
 	// Check notification
 	if ('Notification' in window) {
@@ -399,5 +404,8 @@ module.exports = function(Vue, io) {
 		return msgItem;
 
 	}
+
+	// For test
+	return Chat;
 
 }
