@@ -9079,6 +9079,18 @@ module.exports = function(Vue, io) {
 							showMsg(response.data[i], false);
 						}
 					}
+
+					// If history message, show the tip
+					if (hasHistoryMsg) {
+						_this.contents.push(
+							{
+								isJoinShow: true,
+								text: '-------- History Message --------'
+							}
+						);
+						hasHistoryMsg = false;
+					}
+
 					_this.isGettingMsg = false;
 				})
 				.catch(function(error) {
@@ -9265,18 +9277,6 @@ module.exports = function(Vue, io) {
 
 	// User join
 	socket.on('user join', function(data) {
-
-		if (hasHistoryMsg) {
-			Chat.contents.push(
-				{
-					isJoinShow: true,
-					text: 'History Message.'
-				}, {
-					isJoinShow: true,
-					text: '--------------------------------'
-				}
-			);
-		}
 
 		Chat.contents.push({
 			isJoinShow: true,
