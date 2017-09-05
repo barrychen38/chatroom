@@ -8,9 +8,9 @@
 
 ```bash
 git clone https://github.com/Chen38/nodejs_chat-room.git
-// Install the node packages
+# Install the node packages
 npm i
-// Run the node server
+# Run the node server
 npm run serve
 ```
 
