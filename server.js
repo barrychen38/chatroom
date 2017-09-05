@@ -1,5 +1,6 @@
 // Import from npm package
 const express = require('express');
+const compression = require('compression');
 const http = require('http');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -104,6 +105,7 @@ app.all('*', (req, res, next) => {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 // Use middlewares
+app.use(compression());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: 1024 * 1024 * 2}));
 app.use(bodyParser.urlencoded({

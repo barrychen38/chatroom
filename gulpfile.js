@@ -17,7 +17,7 @@ gulp.task('browserify', () => {
 		source('bundle.js'),
 		buffer(),
 		// Uglify function
-		// uglify(),
+		uglify(),
 		gulp.dest('./public/dist/js')
 	]);
 
