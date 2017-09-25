@@ -1,6 +1,7 @@
 // Import from npm package
 const express = require('express');
 const compression = require('compression');
+const favicon = require('serve-favicon')
 const http = require('http');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -106,6 +107,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 // Use middlewares
 app.use(compression());
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: 1024 * 1024 * 2}));
 app.use(bodyParser.urlencoded({

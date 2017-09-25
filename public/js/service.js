@@ -1,13 +1,11 @@
 var axios = require('axios');
-var helper = require('./helper');
+var util = require('./util');
 var Promise = require('es6-promise').Promise;
 
 module.exports = {
 
 	/**
 	 * Upload image and get server link
-	 *
-	 * @return Promise
 	 */
 	uploadImage: function(file) {
 		var url = '/upload';
@@ -18,12 +16,10 @@ module.exports = {
 
 	/**
 	 * Get the lastest chat messages(10)
-	 *
-	 * @return Promise
 	 */
 	getLatestMsg: function() {
 
-		if (!helper.getItem('chatId')) {
+		if (!util.getItem('chatId')) {
 			return new Promise(function(resolve) {
 				resolve({data: []});
 			});

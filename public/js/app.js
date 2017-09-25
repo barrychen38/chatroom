@@ -1,19 +1,13 @@
-var Vue = require('../vendor/vue');
+var Vue = require('../vendor/vue.min');
 var io = require('socket.io-client');
 
 var emoji = require('./emoji');
-var helper = require('./helper');
+var util = require('./util');
 var service = require('./service');
 
 module.exports = function() {
 
 	Vue.config.devtools = false;
-
-	// Check notification
-	if ('Notification' in window) {
-		window.Notification.requestPermission();
-		var checkPermission = window.Notification.permission;
-	}
 
 	var emojiLength = emoji.names.length;
 
@@ -21,8 +15,7 @@ module.exports = function() {
 			chatId,
 			user,
 			yourNickname,
-			hasHistoryMsg = false,
-			MAX_WINDOW_HEIGHT = 380;
+			hasHistoryMsg = false;
 
 	var reader = new FileReader();
 
@@ -66,11 +59,11 @@ module.exports = function() {
 		mounted: function() {
 
 			// Get the info first to judge who you are
-			chatId = helper.getItem('chatId');
-			user = helper.getItem('user');
+			chatId = util.getItem('chatId');
+			user = util.getItem('user');
 
-			var _this = this;
-			_this.isGettingMsg = true;
+			var self = this;
+			self.isGettingMsg = true;
 			service.getLatestMsg()
 				.then(function(response) {
 					if (response.data.length) {
@@ -83,19 +76,19 @@ module.exports = function() {
 
 					// If history message, show the tip
 					if (hasHistoryMsg) {
-						_this.contents.push(
+						self.contents.push(
 							{
 								isJoinShow: true,
-								text: '-------- History Message --------'
+								text: 'History Messages'
 							}
 						);
 						hasHistoryMsg = false;
 					}
 
-					_this.isGettingMsg = false;
+					self.isGettingMsg = false;
 				})
 				.catch(function(error) {
-					_this.isGettingMsg = false;
+					self.isGettingMsg = false;
 					throw new Error(error.message);
 				})
 		},
@@ -123,7 +116,7 @@ module.exports = function() {
 					this.isNicknameShow = false;
 					socket.emit('user join', {
 						user: yourNickname,
-						chatId: helper.getItem('chatId')
+						chatId: util.getItem('chatId')
 					});
 				}
 			},
@@ -140,51 +133,18 @@ module.exports = function() {
 			},
 
 			showInfo: function(infoMsg) {
-				var _this = this,
+				var self = this,
 						showTimer;
 				clearTimeout(showTimer);
-				_this.isInfoShow = true;
-				_this.info = infoMsg;
+				self.isInfoShow = true;
+				self.info = infoMsg;
 				showTimer = setTimeout(function() {
-					_this.isInfoShow = false;
-					// _this.info = '';
+					self.isInfoShow = false;
 				}, 1000);
 			},
 
-			getEmojiName: function(emoji) {
-				emoji = emoji.replace('[', '');
-				emoji = emoji.replace(']', '');
-				return emoji;
-			},
-
-			checkMessage: function(msg) {
-				var _message = msg,
-						emojis = _message.match(/\[[a-z_]+\]/g);
-				if (_message.indexOf('<') !== -1) {
-					_message = _message.replace(/</g, '&lt;');
-				}
-				if (_message.indexOf('>') !== -1) {
-					_message = _message.replace(/>/g, '&gt;');
-				}
-				if (_message.indexOf('\n') !== -1 && _message.match(/\n/g).length === _message.length) {
-					_message = _message.replace(/\n/g, '');
-				}
-				if (emojis !== null) {
-					var i = 0,
-							len = emojis.length,
-							emojiName;
-					for (; i < len; i++) {
-						emojiName = this.getEmojiName(emojis[i]);
-						if (emoji.inputNames.indexOf(emojiName) !== -1) {
-							_message = _message.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
-						}
-					}
-				}
-				return _message;
-			},
-
 			sendMessage: function(event) {
-				var transformMessage = this.checkMessage(this.typeMessage);
+				var transformMessage = checkMessage(this.typeMessage);
 				if (event.ctrlKey) {
 					this.typeMessage += '\n';
 					return;
@@ -200,16 +160,8 @@ module.exports = function() {
 				});
 			},
 
-			preloadImage: function(src, fn) {
-				var image = new Image();
-				image.src = src;
-				image.onload = function() {
-					fn && fn();
-				}
-			},
-
 			sendImage: function(event) {
-				var _this = this,
+				var self = this,
 						_file,
 						_val,
 						_target = event.target;
@@ -217,12 +169,12 @@ module.exports = function() {
 					_val = this.value;
 					_file = this.files[0];
 					if (!_file.type.match(/(jpg|jpeg|png|gif)/g)) {
-						_this.showInfo('Please choose an Image.');
+						self.showInfo('Please choose an Image.');
 						_val = '';
 						return;
 					}
-					if (_file.size > 1024 * 1024 * 2) {
-						_this.showInfo('Please choose an image less than 2MB.');
+					if (_file.size > util.MAX_IMAGE_SIZE) {
+						self.showInfo('Please choose an image less than 2MB.');
 						_val = '';
 						return;
 					}
@@ -246,25 +198,6 @@ module.exports = function() {
 							});
 					}
 				}
-			},
-
-			scrollInner: function() {
-				var scroller = document.querySelector('.inner'),
-						diffHeight = scroller.scrollHeight - MAX_WINDOW_HEIGHT;
-				if (diffHeight <= 0) {
-					return;
-				}
-				scroller.scrollTop = diffHeight;
-			},
-
-			alertMessage: function(user, body) {
-				if (checkPermission === 'granted') {
-					var notify = new Notification(user, {
-						body: body,
-						icon: '/dist/img/notify.png',
-						eventTime: 800
-					});
-				}
 			}
 
 		}
@@ -285,18 +218,18 @@ module.exports = function() {
 		});
 
 		Vue.nextTick(function() {
-			Chat.scrollInner();
+			util.smoothScroll();
 		});
 
 	});
 
 	// Set chatId
 	socket.on('set uuid', function(userInfo) {
-		if (!helper.getItem('chatId')) {
-			helper.setItem('chatId', userInfo.chatId);
+		if (!util.getItem('chatId')) {
+			util.setItem('chatId', userInfo.chatId);
 			chatId = userInfo.chatId;
 		}
-		helper.setItem('user', userInfo.user);
+		util.setItem('user', userInfo.user);
 		user = userInfo.user;
 	});
 
@@ -310,7 +243,7 @@ module.exports = function() {
 		});
 
 		Vue.nextTick(function() {
-			Chat.scrollInner();
+			util.smoothScroll();
 		});
 
 	});
@@ -329,7 +262,7 @@ module.exports = function() {
 
 		Chat.isJoinShow = false;
 
-		Chat.preloadImage(imgItem.image, function() {
+		util.preloadImage(imgItem.image, function() {
 			showMsg(imgItem);
 		});
 
@@ -341,12 +274,12 @@ module.exports = function() {
 
 		Chat.contents.push(msgItem);
 		Vue.nextTick(function() {
-			Chat.scrollInner();
+			util.smoothScroll();
 		});
 	}
 
 	/**
-	 * Check user
+	 * Check user to identify who you are
 	 */
 	function checkUser(item, showAlert) {
 
@@ -370,7 +303,7 @@ module.exports = function() {
 
 			// Send message
 			if (item.text) {
-				transformText = Chat.checkMessage(item.text);
+				transformText = checkMessage(item.text);
 				msgItem.text = transformText + '<dt>Me</dt>';
 				return msgItem;
 			}
@@ -388,9 +321,9 @@ module.exports = function() {
 
 			// Send message
 			if (showAlert) {
-				Chat.alertMessage(_people, item.text);
+				util.alertMessage(_people, item.text);
 			}
-			transformText = Chat.checkMessage(item.text);
+			transformText = checkMessage(item.text);
 			msgItem.text = transformText + '<dt>' + _people + '</dt>';
 			return msgItem;
 
@@ -398,14 +331,39 @@ module.exports = function() {
 
 		// Send image
 		if (showAlert) {
-			Chat.alertMessage(_people, 'Send a photo in Group Chat.');
+			util.alertMessage(_people, 'Send a photo in Group Chat.');
 		}
 		msgItem.text = '<img src="' + item.image + '"><dt>' + _people + '</dt>';
 		return msgItem;
-
 	}
 
-	// For test
-	return Chat;
+	/**
+	 * Check and filter the message
+	 */
+	function checkMessage(msg) {
+		var message = msg,
+				emojis = message.match(/\[[a-z_]+\]/g);
+		if (message.indexOf('<') !== -1) {
+			message = message.replace(/</g, '&lt;');
+		}
+		if (message.indexOf('>') !== -1) {
+			message = message.replace(/>/g, '&gt;');
+		}
+		if (message.indexOf('\n') !== -1 && message.match(/\n/g).length === message.length) {
+			message = message.replace(/\n/g, '');
+		}
+		if (emojis !== null) {
+			var i = 0,
+					len = emojis.length,
+					emojiName;
+			for (; i < len; i++) {
+				emojiName = util.getEmojiName(emojis[i]);
+				if (emoji.inputNames.indexOf(emojiName) !== -1) {
+					message = message.replace(emojis[i], '<i class="em em-' + emojis[i].match(/[a-z_]+/g)[0] + '"></i>');
+				}
+			}
+		}
+		return message;
+	}
 
 }
