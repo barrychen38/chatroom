@@ -9,14 +9,15 @@ html(lang="en")
 		link(rel="stylesheet", href="/dist/css/main.css")
 	body
 		#app(v-cloak @click="showEmojisTable")
-			.enter-nickname(v-show="isNicknameShow")
-				.form
-					input.nickname(type="text", name="nickname", maxlength="20", autofocus, placeholder="Enter your nickname" v-model="nickname", @keydown.13.prevent="confirmNickname(nickname)")
-					br
-					input.confirm.box-shadow(type="button", name="confirm", value="Go Chat", @click.prevent="confirmNickname(nickname)")
-					p.warn(v-show="isWarnShow") {{ confirmResult }}
-			.container(v-show="!isNicknameShow")
-				.wrapper.box-shadow.block-center
+			transition(name="slide-up")
+				.enter-nickname(v-if="isNicknameShow")
+					.form
+						input.nickname(type="text", name="nickname", maxlength="20", autofocus, placeholder="Enter your nickname" v-model="nickname", @keydown.13.prevent="confirmNickname(nickname)")
+						br
+						input.confirm.box-shadow(type="button", name="confirm", value="Go Chat", @click.prevent="confirmNickname(nickname)")
+						p.warn(v-show="isWarnShow") {{ confirmResult }}
+			.container
+				.wrapper.box-shadow.block-center(v-if="!isNicknameShow")
 					.whoiam.bloack-center
 						span.name.float-left {{ nickname }}
 						transition(name="fade")
@@ -33,9 +34,11 @@ html(lang="en")
 						i.em.all(@click.stop="showEmojisTable")
 						i.em.image
 							input.file(type="file", name="file", accept="images/*", @click="sendImage")
-						.table.clearfix(v-show="isEmojisShow")
-							i(v-for="(emoji, index) in emojis", :class="emoji.className", :title="emoji.title", @click="chooseEmoji(index)")
+						transition(name="slide-up-show")
+							.table.clearfix(v-show="isEmojisShow")
+								i(v-for="(emoji, index) in emojis", :class="emoji.className", :title="emoji.title", @click="chooseEmoji(index)")
 					.text.block-center
 						textarea.input(name="input", placeholder="Send Message", autofocus, v-model="typeMessage", @keydown.13.prevent="sendMessage")
-				p.tip Enter to send, Ctrl + Enter to wrap.
+				transition(name="slide-down-show")
+					p.tip(v-if="!isNicknameShow") Enter to send, Ctrl + Enter to wrap.
 		script(type="text/javascript", aysnc, src="/dist/js/bundle.js")

@@ -18,6 +18,9 @@
 	position: absolute;
 	top: 0;
 	left: 0;
+	will-change: transform;
+	-webkit-transition: transform .3s ease;
+	transition: transform .3s ease;
 	.form {
 		width: 360px;
 		height: auto;
@@ -56,6 +59,8 @@
 		height: auto;
 		background: #fff;
 		border-radius: 4px;
+		z-index: 2;
+		position: relative;
 	}
 	.whoiam {
 		width: 520px;
@@ -215,6 +220,9 @@
 			-webkit-box-shadow: 10px 10px 24px 0 #eee;
 			box-shadow: 10px 10px 24px 0 #eee;
 			z-index: 3;
+			will-change: transform, opacity;
+			-webkit-transition: all .3s ease;
+			transition: all .3s ease;
 			&:before, &:after {
 				content: '';
 				display: inline-block;
@@ -273,19 +281,46 @@
 		padding: 12px 0;
 		letter-spacing: 0.5px;
 		cursor: default;
+		will-change: transform;
+		-webkit-transition: transform .6s cubic-bezier(0.29, 0.03, 0.37, 0.9);
+		transition: transform .6s cubic-bezier(0.29, 0.03, 0.37, 0.9);
 	}
 }
 
-/*-------- animate start --------*/
-.fade-enter-active, .fade-leave-active {
+/*-------- Transition Start --------*/
+.fade-enter-active,
+.fade-leave-active {
 	-webkit-transition: opacity .3s;
 	transition: opacity .3s;
 }
-.fade-enter, .fade-leave-active {
+.fade-enter,
+.fade-leave-active {
 	opacity: 0;
 }
-/*-------- animate end --------*/
 
+.slide-up-leave-active {
+	-webkit-transform: translate3d(0, -100%, 0);
+	transform: translate3d(0, -100%, 0);
+}
+
+.slide-up-show-enter-active,
+.slide-up-show-leave-active {
+	-webkit-transform: translate3d(0, 16px, 0);
+	transform: translate3d(0, 16px, 0);
+	opacity: 0;
+}
+
+.slide-down-show-enter {
+	-webkit-transform: translate3d(0, -40px, 0);
+	transform: translate3d(0, -40px, 0);
+}
+/*-------- Transition End --------*/
+
+/*-------- Animation Start --------*/
+
+/*-------- Animation End --------*/
+
+// Media Query
 @media screen and (max-width: 640px) {
 	#app {
 		display: none;
