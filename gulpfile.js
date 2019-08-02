@@ -1,7 +1,8 @@
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const plumber = require('gulp-plumber');
-const compass = require('gulp-compass');
+const sass = require('gulp-sass');
+const sourcemaps = require('gulp-sourcemaps');
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
@@ -22,23 +23,22 @@ gulp.task('browserify', () => {
 
 });
 
-gulp.task('compass', () => {
+gulp.task('sass', () => {
 
 	pump([
 		gulp.src('./public/sass/*.scss'),
 		plumber(),
-		compass({
-			config_file: './config.rb',
-			css: './public/dist/css',
-			sass: './public/sass'
-		}),
+		sourcemaps.init(),
+		sass({outputStyle: 'compressed'}),
+		sourcemaps.write('./'),
 		gulp.dest('./public/dist/css')
 	]);
 
 });
 
-gulp.task('dev', ['browserify', 'compass']);
+gulp.task('dev', ['browserify', 'sass']);
 
 // Watch files to continue run
+
 gulp.watch('./public/js/*.js', ['browserify']);
-gulp.watch('./public/sass/*.scss', ['compass']);
+gulp.watch('./public/sass/*.scss', ['sass']);

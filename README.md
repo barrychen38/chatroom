@@ -1,6 +1,6 @@
 ## NODEJS_CHAT-ROOM
 
-[![Build Status](https://travis-ci.org/Chen38/nodejs_chat-room.svg?branch=develop)](https://travis-ci.org/Chen38/nodejs_chat-room)
+[![Build Status](https://travis-ci.org/Chen38/chatroom.svg?branch=develop)](https://travis-ci.org/Chen38/chatroom)
 
 主要还是一个聊天的小玩意儿，照着 `Socket.io` 官方文档一步步写下来，花了点时间去理解。其中主要是事件的触发和数据的传递，当然还有很多其他功能等着去发现。
 
